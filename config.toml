@@ -1,0 +1,13 @@
+baseURL = 'https://chienfuchen32.github.io/'
+languageCode = 'en-us'
+title = 'My New Blog'
+theme = "hyde"
+
+[params]
+  description = "hello there"
+  themeColor = "theme-base-0d"
+
+[Menus]
+  main = [
+      {Name = "Github", URL = "https://github.com/chienfuchen32/"}
+  ]
