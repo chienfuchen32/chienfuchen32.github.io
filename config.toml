@@ -4,7 +4,7 @@ title = 'My New Blog'
 theme = "hyde"
 
 [params]
-  description = "hello there"
+  description = "hello there!"
   themeColor = "theme-base-0d"
 
 [Menus]
