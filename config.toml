@@ -1,6 +1,6 @@
 baseURL = 'https://chienfuchen32.github.io/'
 languageCode = 'en-us'
-title = 'My New Blog'
+title = 'New Blog'
 theme = "hyde"
 
 [params]
