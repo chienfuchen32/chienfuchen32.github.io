@@ -11,3 +11,5 @@ theme = "hyde"
   main = [
       {Name = "Github", URL = "https://github.com/chienfuchen32/"}
   ]
+
+googleAnalytics = 'G-3SNCDP141D'
