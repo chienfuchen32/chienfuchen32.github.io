@@ -6,10 +6,10 @@ theme = "hyde"
 [params]
   description = "hello there!"
   themeColor = "theme-base-0d"
+  # Google Analytics 4
+  googleAnalytics = 'G-3SNCDP141D'
 
 [Menus]
   main = [
       {Name = "Github", URL = "https://github.com/chienfuchen32/"}
   ]
-
-googleAnalytics = 'G-3SNCDP141D'
