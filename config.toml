@@ -3,11 +3,12 @@ languageCode = 'en-us'
 title = 'New Blog'
 theme = "hyde"
 
+# Google Analytics 4
+googleAnalytics = "G-3SNCDP141D"
+
 [params]
   description = "hello there!"
   themeColor = "theme-base-0d"
-  # Google Analytics 4
-  googleAnalytics = 'G-3SNCDP141D'
 
 [Menus]
   main = [
