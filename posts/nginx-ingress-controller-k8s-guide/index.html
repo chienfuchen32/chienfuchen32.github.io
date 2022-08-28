@@ -1,0 +1,169 @@
+<!doctype html><html xmlns=http://www.w3.org/1999/xhtml xml:lang=en-us lang=en-us><head><link href=https://gmpg.org/xfn/11 rel=profile><meta charset=utf-8><meta name=generator content="Hugo 0.101.0"><meta name=viewport content="width=device-width,initial-scale=1"><title>Nginx Ingress Controller K8S Guide &#183; New Blog</title><meta name=description content><link type=text/css rel=stylesheet href=https://chienfuchen32.github.io/css/print.css media=print><link type=text/css rel=stylesheet href=https://chienfuchen32.github.io/css/poole.css><link type=text/css rel=stylesheet href=https://chienfuchen32.github.io/css/syntax.css><link type=text/css rel=stylesheet href=https://chienfuchen32.github.io/css/hyde.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Abril+Fatface|PT+Sans:400,400i,700"><link rel=apple-touch-icon-precomposed sizes=144x144 href=/apple-touch-icon-144-precomposed.png><link rel="shortcut icon" href=/favicon.png></head><body class=theme-base-0d><aside class=sidebar><div class="container sidebar-sticky"><div class=sidebar-about><a href=https://chienfuchen32.github.io/><h1>New Blog</h1></a><p class=lead>hello there!</p></div><nav><ul class=sidebar-nav><li><a href=https://chienfuchen32.github.io/>Home</a></li><li><a href=https://github.com/chienfuchen32/>Github</a></li></ul></nav><p>&copy; 2022. All rights reserved.</p></div></aside><main class="content container"><div class=post><h1>Nginx Ingress Controller K8S Guide</h1><time datetime=2022-04-15T15:45:07+0800 class=post-date>Fri, Apr 15, 2022</time><h1 id=nginx-ingress-controller-k8s-guide>Nginx Ingress Controller K8S Guide</h1><p>&mldr;</p><h2 id=nginx-介紹>Nginx 介紹</h2><p>Nginx是非同步框架的網頁伺服器，也可以用作反向代理、負載平衡器和HTTP快取。
+<img src=https://miro.medium.com/max/1024/1*TrNJZqECEj0eVuJDeNKtNQ.png alt=nginx></p><ul><li>設置範例</li></ul><pre tabindex=0><code class=language-conf data-lang=conf>server {
+    listen       80;
+    listen  [::]:80;
+    server_name  localhost;
+
+    listen 443 ssl default_server;
+    ssl_certificate /tls/server.crt;
+    ssl_certificate_key /tls/server.key;
+
+    #charset koi8-r;
+    #access_log  /var/log/nginx/host.access.log  main;
+
+    location / {
+        #root   /usr/share/nginx/html;
+        #index  index.html index.htm;
+		proxy_pass http://192.168.24.100:9090/;
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection &#34;Upgrade&#34;;
+		proxy_set_header Host $host;
+		proxy_connect_timeout 60s;
+		proxy_read_timeout 300s;
+		proxy_send_timeout 300s;
+    }
+
+
+    location /socket.io {
+        proxy_pass http://192.168.24.100:9091/;
+        #Version 1.1 is recommended for use with keepalive connections
+        proxy_http_version 1.1; #WebSocket
+        proxy_set_header Upgrade $http_upgrade; #WebSocket
+        proxy_set_header Connection $connection_upgrade; #WebSocket       
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header Cookie $http_cookie;
+    }
+
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+
+}
+</code></pre><p>可以透過<code>nginx -s reload</code>讓nginx對新的配置生效</p><ul><li><a href=https://nginx.org/en/docs/beginners_guide.html>https://nginx.org/en/docs/beginners_guide.html</a></li><li><a href=https://nginx.org/en/docs/>https://nginx.org/en/docs/</a></li></ul><h2 id=k8s-service>K8S service</h2><p><img src=https://miro.medium.com/max/1094/1*YeBt0Z9BEA7T_tUO4iYQyQ.png alt=service>
+K8S 定義 Service 這個 resource object，在 pod 的前方提供了一個抽象層，讓外部的服務可以用
+domain name 的方式存取 pod，而 domain name &lt;–> Pod 這一段問題，就由 Service 來處理。 但利用
+domain name 來存取終究還是需要一個 IP address，而每個 Service 都會自帶 VIP，讓 network traffic
+有辦法正常送過來，並導到後方真正提供服務的 pod。</p><ul><li><a href=https://kubernetes.io/docs/concepts/services-networking/service/>https://kubernetes.io/docs/concepts/services-networking/service/</a></li><li><a href=https://godleon.github.io/blog/Kubernetes/k8s-Service-Overview/>https://godleon.github.io/blog/Kubernetes/k8s-Service-Overview/</a></li></ul><h2 id=k8s-ingress>K8S Ingress</h2><p><img src=https://miro.medium.com/max/1024/1*BYGsxY_GR-eZgNJfbbikzA.png alt=ingress>
+Ingress是從Kubernetes叢集外部訪問到群集內部服務的方法之一</p><ul><li><a href=https://kubernetes.io/docs/concepts/services-networking/ingress/>https://kubernetes.io/docs/concepts/services-networking/ingress/</a></li></ul><h2 id=nginx-ingress-controller>Nginx Ingress controller</h2><p>為了讓Ingress資源工作，叢集必須有一個正在運行的Ingress controller，其功能實作如:</p><ul><li>SSL/TLS offloading</li><li>反向代理，域名解析</li><li>四層和七層區別網路封包轉導</li></ul><pre tabindex=0><code>Kubernetes                                                  Workstation
++---------------------------------------------------+     +------------------+
+|                                                   |     |                  |
+|  +-----------+   apiserver        +------------+  |     |  +------------+  |
+|  |           |   proxy            |            |  |     |  |            |  |
+|  | apiserver |                    |  ingress   |  |     |  |  ingress   |  |
+|  |           |                    | controller |  |     |  | controller |  |
+|  |           |                    |            |  |     |  |            |  |
+|  |           |                    |            |  |     |  |            |  |
+|  |           |  service account/  |            |  |     |  |            |  |
+|  |           |  kubeconfig        |            |  |     |  |            |  |
+|  |           +&lt;-------------------+            |  |     |  |            |  |
+|  |           |                    |            |  |     |  |            |  |
+|  +------+----+      kubeconfig    +------+-----+  |     |  +------+-----+  |
+|         |&lt;--------------------------------------------------------|        |
+|                                                   |     |                  |
++---------------------------------------------------+     +------------------+
+</code></pre><ul><li><a href=https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/>https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/</a></li><li></li><li><a href=https://kubernetes.github.io/ingress-nginx/how-it-works/>https://kubernetes.github.io/ingress-nginx/how-it-works/</a></li></ul><h2 id=常見使用情形範例與除錯方式>常見使用情形範例與除錯方式</h2><h3 id=dnsip避免影響正式環境>DNS,IP,避免影響正式環境</h3><pre tabindex=0><code class=language-/etc/hosts data-lang=/etc/hosts># 20220415 lab
+192.168.24.1 lab-20220415.foo.com
+192.168.24.1 lab-20220415.bar.foo.com
+</code></pre><h3 id=backend-service-k8s-pod-or-external-service>Backend service (K8S pod or external service)</h3><ul><li>於pod/container中使用<code>curl</code> / <code>wget</code> 工具:</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>$ curl localhost:5000/healthz
+</span></span></code></pre></div><ul><li>透過本機連線來除錯 service port forward (cli or lens)</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>$ kubectl port-forward -n 20220415-nginx-lab service/nginx-lab 25000/5000
+</span></span></code></pre></div><ul><li>annotations:
+nginx.ingress.kubernetes.io/rewrite-target: /$2
+name: rewrite
+namespace: default
+spec:
+ingressClassName: nginx
+rules:<ul><li>host: rewrite.bar.com
+http:
+paths:<ul><li>path: /something(/|$)(.*)
+pathType: Prefix
+backend:
+service:
+name: http-svc
+port:
+number: 80
+&rsquo; | kubectl create -f -</li></ul></li></ul></li></ul><pre tabindex=0><code>In this ingress definition, any characters captured by (.*) will be assigned to the 
+placeholder $2, which is then used as a parameter in the rewrite-target annotation.
+For example, the ingress definition above will result in the following rewrites:
+1. `rewrite.bar.com/something` rewrites to `rewrite.bar.com`
+2. `rewrite.bar.com/something/` rewrites to `rewrite.bar.com/`
+3. `rewrite.bar.com/something/new` rewrites to `rewrite.bar.com/new`
+</code></pre><p>example</p><p>rewrite.bar.com/something/new |&mdash;&mdash;&mdash;&mdash;| IP:PORT/new |&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;|
+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;>| Nginx |&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;>| backend service |
+|&mdash;&mdash;&mdash;&mdash;| |&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;|</p><pre tabindex=0><code>https://kubernetes.github.io/ingress-nginx/examples/rewrite/
+### SSL/TLS Offloading
+* https://www.nginx.com/blog/nginx-ssl/
+
+### Websocket
+* https://nginx.org/en/docs/http/websocket.html
+* 
+https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#custom-timeouts
+### TCP/UDP service
+* https://nginx.org/en/docs/stream/stream_processing.html
+* https://kubernetes.github.io/ingress-nginx/user-guide/exposing-tcp-udp-services/
+
+# lab and demo
+* https://github.com/chienfuchen32/k8s-nginx-ingress-hands-on-lab
+1. develope app
+2. deploy
+* examples
+https://lab-20220415.foo.com/
+https://lab-20220415.bar.foo.com
+https://lab-20220415.foo.com/nginx-lab/
+https://lab-20220415.foo.com/nginx-lab-rewrite/
+
+# 特殊情境
+## 若服務不在K8S中，在同一個LAN的VM，可以從K8S叢集連線的到
+* 假設服務跑在http://172.29.49.21:5000
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-svc
+  namespace: app
+spec:
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: ClusterIP
+  sessionAffinity: None
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: external-svc
+  namespace: app
+subsets:
+  - addresses:
+      - ip: 192.168.24.101
+    ports:
+      - port: 5000
+        protocol: TCP
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: external-ingress
+  namespace: app
+  labels:
+    app: external-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: &#39;true&#39;
+spec:
+  rules:
+    - host: mydomain.com
+      http:
+        paths:
+          - path: /path(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              serviceName: external-svc
+              servicePort: 5000
+</code></pre></div></main><script async src="https://www.googletagmanager.com/gtag/js?id=G-3SNCDP141D"></script>
+<script>var doNotTrack=!1;if(!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-3SNCDP141D",{anonymize_ip:!1})}</script></body></html>
