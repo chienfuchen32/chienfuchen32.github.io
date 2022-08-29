@@ -78,7 +78,7 @@ Ingress是從Kubernetes叢集外部訪問到群集內部服務的方法之一
 * 反向代理，域名解析
 * 四層和七層區別網路封包轉導
 
-```
+```txt
 Kubernetes                                                  Workstation
 +---------------------------------------------------+     +------------------+
 |                                                   |     |                  |
@@ -104,7 +104,8 @@ https://www.f5points.com.tw/2021/10/27/ingress-controller-%E9%81%B8%E5%9E%8B%E6%
 
 ## 常見使用情形範例與除錯方式
 ### DNS,IP,避免影響正式環境
-```/etc/hosts
+```txt
+# /etc/hosts
 # 20220415 lab
 192.168.24.1 lab-20220415.foo.com
 192.168.24.1 lab-20220415.bar.foo.com
@@ -118,8 +119,7 @@ $ curl localhost:5000/healthz
 ```bash
 $ kubectl port-forward -n 20220415-nginx-lab service/nginx-lab 25000/5000
 ```
-* 
-https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/
+* https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/
 ### rewrite
 ```bash
 echo '
