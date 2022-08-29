@@ -12,5 +12,10 @@ googleAnalytics = "G-3SNCDP141D"
 
 [Menus]
   main = [
-      {Name = "Github", URL = "https://github.com/chienfuchen32/"}
+      {Name = "Github", URL = "https://github.com/chienfuchen32/"},
+      {Name = "Tags", URL = "https://chienfuchen32.github.io/tags/"}
   ]
+
+[taxonomies]
+  category = "categories"
+  tag = "tags"

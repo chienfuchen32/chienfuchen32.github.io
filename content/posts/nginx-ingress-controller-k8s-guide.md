@@ -2,11 +2,8 @@
 title: "Nginx Ingress Controller K8S Guide"
 date: 2022-04-15T15:45:07+08:00
 draft: true
+tags: ["Kubernetes", "Ingress", "reverse proxy"]
 ---
-
-# Nginx Ingress Controller K8S Guide
-...
-
 ## Nginx 介紹
 Nginx是非同步框架的網頁伺服器，也可以用作反向代理、負載平衡器和HTTP快取。
 ![nginx](https://miro.medium.com/max/1024/1*TrNJZqECEj0eVuJDeNKtNQ.png)
@@ -186,7 +183,7 @@ https://lab-20220415.foo.com/nginx-lab-rewrite/
 
 # 特殊情境
 ## 若服務不在K8S中，在同一個LAN的VM，可以從K8S叢集連線的到
-* 假設服務跑在http://172.29.49.21:5000
+* 假設服務跑在http://192.168.24.101:5000
 ```yaml
 apiVersion: v1
 kind: Service
