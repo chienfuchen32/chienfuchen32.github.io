@@ -1,0 +1,1 @@
+[![github pages](https://github.com/chienfuchen32/chienfuchen32.github.io/actions/workflows/gh-pages.yaml/badge.svg?branch=main)](https://github.com/chienfuchen32/chienfuchen32.github.io/actions/workflows/gh-pages.yaml)
