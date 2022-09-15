@@ -3,6 +3,8 @@
 ## local writing
 ```bash
 $ hugo server -D
+# open new shell
+$ hugo new posts/<POST_NAME>.md
 ```
 
 ## push newest changes and deploy page with GitHub workflow
