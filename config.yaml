@@ -1,0 +1,29 @@
+baseurl: 'https://chienfuchen32.github.io/'
+languagecode: 'en-us'
+title: 'New Blog'
+theme: "paige"
+
+enablerobotstxt: true
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+  highlight:
+    style: vs
+
+# Google Analytics 4
+googleAnalytics: "G-3SNCDP141D"
+
+menu:
+  main:
+  - name: Posts
+    url: /posts/
+  - name: Tags
+    url: /tags/
+
+paginate: 50
+
+social:
+  github: https://github.com/chienfuchen32
+  linkedin: https://www.linkedin.com/in/chienfuchen32
+
