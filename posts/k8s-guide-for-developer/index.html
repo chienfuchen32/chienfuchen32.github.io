@@ -1,153 +1,160 @@
-<!doctype html><html xmlns=http://www.w3.org/1999/xhtml xml:lang=en-us lang=en-us><head><link href=https://gmpg.org/xfn/11 rel=profile><meta charset=utf-8><meta name=generator content="Hugo 0.102.3"><meta name=viewport content="width=device-width,initial-scale=1"><title>Kubernetes Guide for Developer &#183; New Blog</title><meta name=description content><link type=text/css rel=stylesheet href=https://chienfuchen32.github.io/css/print.css media=print><link type=text/css rel=stylesheet href=https://chienfuchen32.github.io/css/poole.css><link type=text/css rel=stylesheet href=https://chienfuchen32.github.io/css/syntax.css><link type=text/css rel=stylesheet href=https://chienfuchen32.github.io/css/hyde.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Abril+Fatface|PT+Sans:400,400i,700"><link rel=apple-touch-icon-precomposed sizes=144x144 href=/apple-touch-icon-144-precomposed.png><link rel="shortcut icon" href=/favicon.png></head><body class=theme-base-0d><aside class=sidebar><div class="container sidebar-sticky"><div class=sidebar-about><a href=https://chienfuchen32.github.io/><h1>New Blog</h1></a><p class=lead>hello there!</p></div><nav><ul class=sidebar-nav><li><a href=https://chienfuchen32.github.io/>Home</a></li><li><a href=https://github.com/chienfuchen32/>Github</a></li><li><a href=https://chienfuchen32.github.io/tags/>Tags</a></li></ul></nav><p>&copy; 2022. All rights reserved.</p></div></aside><main class="content container"><div class=post><h1>Kubernetes Guide for Developer</h1><time datetime=2022-03-18T14:32:45+0800 class=post-date>Fri, Mar 18, 2022</time><h2 id=environment>Environment</h2><p>Before you try to use any client tool connect to Kubernetes, please check the endpoint field
-&ldquo;server&rdquo; of &ldquo;cluster&rdquo; credential config file.</p><p>Please make sure you&rsquo;re able connect with the kube-apiserver.</p><p>For instance, example below shown here is &ldquo;k8s-cluster&rdquo;</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#f92672>apiVersion</span>: <span style=color:#ae81ff>v1</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>kind</span>: <span style=color:#ae81ff>Config</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>clusters</span>:
-</span></span><span style=display:flex><span>  - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>team-a-admin@kubernetes</span>
-</span></span><span style=display:flex><span>    <span style=color:#f92672>cluster</span>:
-</span></span><span style=display:flex><span>      <span style=color:#f92672>server</span>: <span style=color:#e6db74>&#39;https://k8s-cluster:8443&#39;</span>
-</span></span><span style=display:flex><span>      <span style=color:#f92672>certificate-authority-data</span>: &gt;-<span style=color:#e6db74>
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>        </span>        <span style=color:#ae81ff>xxxxx</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>users</span>:
-</span></span><span style=display:flex><span>  - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>team-a-admin</span>
-</span></span><span style=display:flex><span>    <span style=color:#f92672>user</span>:
-</span></span><span style=display:flex><span>      <span style=color:#f92672>token</span>: &gt;-<span style=color:#e6db74>
-</span></span></span><span style=display:flex><span><span style=color:#e6db74>        </span>        <span style=color:#ae81ff>xxxxx</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>contexts</span>:
-</span></span><span style=display:flex><span>  - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>team-a-admin@kubernetes</span>
-</span></span><span style=display:flex><span>    <span style=color:#f92672>context</span>:
-</span></span><span style=display:flex><span>      <span style=color:#f92672>user</span>: <span style=color:#ae81ff>team-a-admin</span>
-</span></span><span style=display:flex><span>      <span style=color:#f92672>cluster</span>: <span style=color:#ae81ff>team-a-admin@kubernetes</span>
-</span></span><span style=display:flex><span>      <span style=color:#f92672>namespace</span>: <span style=color:#ae81ff>team-a</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>current-context</span>: <span style=color:#ae81ff>team-a-admin@kubernetes</span>
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta content="Ingress,Kubernetes" name=keywords><meta content="width=device-width,initial-scale=1" name=viewport><meta property="og:title" content="Kubernetes Guide for Developer"><meta property="og:description" content="Environment Before you try to use any client tool connect to Kubernetes, please check the endpoint field &ldquo;server&rdquo; of &ldquo;cluster&rdquo; credential config file.
+Please make sure you&rsquo;re able connect with the kube-apiserver.
+For instance, example below shown here is &ldquo;k8s-cluster&rdquo;
+apiVersion: v1 kind: Config clusters: - name: team-a-admin@kubernetes cluster: server: 'https://k8s-cluster:8443' certificate-authority-data: >- xxxxx users: - name: team-a-admin user: token: >- xxxxx contexts: - name: team-a-admin@kubernetes context: user: team-a-admin cluster: team-a-admin@kubernetes namespace: team-a current-context: team-a-admin@kubernetes This example is based on self-host Kubernetes v1."><meta property="og:type" content="article"><meta property="og:url" content="https://chienfuchen32.github.io/posts/k8s-guide-for-developer/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2022-03-18T14:32:45+08:00"><meta property="article:modified_time" content="2022-03-18T14:32:45+08:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="Kubernetes Guide for Developer"><meta name=twitter:description content="Environment Before you try to use any client tool connect to Kubernetes, please check the endpoint field &ldquo;server&rdquo; of &ldquo;cluster&rdquo; credential config file.
+Please make sure you&rsquo;re able connect with the kube-apiserver.
+For instance, example below shown here is &ldquo;k8s-cluster&rdquo;
+apiVersion: v1 kind: Config clusters: - name: team-a-admin@kubernetes cluster: server: 'https://k8s-cluster:8443' certificate-authority-data: >- xxxxx users: - name: team-a-admin user: token: >- xxxxx contexts: - name: team-a-admin@kubernetes context: user: team-a-admin cluster: team-a-admin@kubernetes namespace: team-a current-context: team-a-admin@kubernetes This example is based on self-host Kubernetes v1."><title>Kubernetes Guide for Developer &#183; New Blog</title><link crossorigin=anonymous href=https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css integrity=sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx rel=stylesheet><link crossorigin=anonymous href=https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css rel=stylesheet></head><body class="d-flex flex-column"><div class="container flex-fill"><header><div class=row><div class=col><nav class="d-flex justify-content-center my-3"><ul class="nav nav-pills"><li class=nav-item><a href=/about/ class=nav-link>About</a></li><li class=nav-item><a href=/posts/ class="nav-link active">Posts</a></li><li class=nav-item><a href=/tags/ class=nav-link>Tags</a></li></ul></nav></div></div></header><main><article><header><div class="justify-content-center row"><div class="col col-auto text-center"><div style=max-width:100ch><h1 class="display-5 fw-bold">Kubernetes Guide for Developer</h1><p class=text-muted><time datetime=2022-03-18>March 18, 2022</time></p></div></div></div></header><div class="justify-content-center row"><div class="col col-auto"><div style=max-width:66ch><h2 id=environment>Environment</h2><p>Before you try to use any client tool connect to Kubernetes, please check the endpoint field
+&ldquo;server&rdquo; of &ldquo;cluster&rdquo; credential config file.</p><p>Please make sure you&rsquo;re able connect with the kube-apiserver.</p><p>For instance, example below shown here is &ldquo;k8s-cluster&rdquo;</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>apiVersion: v1
+</span></span><span style=display:flex><span>kind: Config
+</span></span><span style=display:flex><span>clusters:
+</span></span><span style=display:flex><span>  - name: team-a-admin@kubernetes
+</span></span><span style=display:flex><span>    cluster:
+</span></span><span style=display:flex><span>      server: <span style=color:#a31515>&#39;https://k8s-cluster:8443&#39;</span>
+</span></span><span style=display:flex><span>      certificate-authority-data: &gt;-<span style=color:#a31515>
+</span></span></span><span style=display:flex><span><span style=color:#a31515>        </span>        xxxxx
+</span></span><span style=display:flex><span>users:
+</span></span><span style=display:flex><span>  - name: team-a-admin
+</span></span><span style=display:flex><span>    user:
+</span></span><span style=display:flex><span>      token: &gt;-<span style=color:#a31515>
+</span></span></span><span style=display:flex><span><span style=color:#a31515>        </span>        xxxxx
+</span></span><span style=display:flex><span>contexts:
+</span></span><span style=display:flex><span>  - name: team-a-admin@kubernetes
+</span></span><span style=display:flex><span>    context:
+</span></span><span style=display:flex><span>      user: team-a-admin
+</span></span><span style=display:flex><span>      cluster: team-a-admin@kubernetes
+</span></span><span style=display:flex><span>      namespace: team-a
+</span></span><span style=display:flex><span>current-context: team-a-admin@kubernetes
 </span></span></code></pre></div><p>This example is based on self-host Kubernetes v1.18 environment, you machine might not be able to recognize the
-target,</p><p>it lack of DNS and k8s apiserver certificate support currently.</p><p>If you have trouble with this kind of problem, please add a record in my hosts file,
-that makes my machine&rsquo;s dns resolvable.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-txt data-lang=txt><span style=display:flex><span># File path
+target,</p><p>it lack of DNS and k8s apiserver certificate support currently.</p><p>If you have trouble with this kind of problem, please add a record in my <b>hosts</b> file,
+that makes my machine&rsquo;s dns resolvable.</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-txt data-lang=txt><span style=display:flex><span># File path
 </span></span><span style=display:flex><span># Windows: `C:\Windows\System32\drivers\etc\hosts`
 </span></span><span style=display:flex><span># Linux: `/etc/hosts`
 </span></span><span style=display:flex><span>192.168.24.1 k8s-cluster`
-</span></span></code></pre></div><h4 id=k8s-client>K8S client</h4><ul><li><a href=https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/>https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/</a></li><li><a href=https://k8slens.dev/>https://k8slens.dev/</a></li><li><a href=https://k9scli.io>https://k9scli.io</a></li><li><a href=https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/>https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/</a></li></ul><h2 id=docker-registry>Docker Registry</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>$ docker login my-registry.com
+</span></span></code></pre></div><h4 id=k8s-client>K8S client</h4><ul><li><a href=https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/>https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/</a></li><li><a href=https://k8slens.dev/>https://k8slens.dev/</a></li><li><a href=https://k9scli.io>https://k9scli.io</a></li><li><a href=https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/>https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/</a></li></ul><h2 id=docker-registry>Docker Registry</h2><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>$ docker login my-registry.com
 </span></span><span style=display:flex><span>Username: 
 </span></span><span style=display:flex><span>Password:
 </span></span><span style=display:flex><span>$ docker push my-registry.com/my-app:0.0.1
-</span></span></code></pre></div><h2 id=deployment-example-in-our-environment>Deployment example in our environment</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#f92672>apiVersion</span>: <span style=color:#ae81ff>apps/v1</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>kind</span>: <span style=color:#ae81ff>Deployment</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>metadata</span>:
-</span></span><span style=display:flex><span>  <span style=color:#f92672>name</span>: <span style=color:#ae81ff>my-app</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>namespace</span>: <span style=color:#ae81ff>team-a</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>spec</span>:
-</span></span><span style=display:flex><span>  <span style=color:#f92672>selector</span>:
-</span></span><span style=display:flex><span>    <span style=color:#f92672>matchLabels</span>:
-</span></span><span style=display:flex><span>      <span style=color:#f92672>app</span>: <span style=color:#ae81ff>my-app</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>replicas</span>: <span style=color:#ae81ff>1</span> <span style=color:#75715e># tells deployment to run 2 pods matching the template</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>template</span>:
-</span></span><span style=display:flex><span>    <span style=color:#f92672>metadata</span>:
-</span></span><span style=display:flex><span>      <span style=color:#f92672>labels</span>:
-</span></span><span style=display:flex><span>        <span style=color:#f92672>app</span>: <span style=color:#ae81ff>my-app</span>
-</span></span><span style=display:flex><span>    <span style=color:#f92672>spec</span>:
-</span></span><span style=display:flex><span>      <span style=color:#f92672>containers</span>:
-</span></span><span style=display:flex><span>      - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>my-app</span>
-</span></span><span style=display:flex><span>        <span style=color:#f92672>image</span>: <span style=color:#ae81ff>my-registry/my-app:0.0.1</span>
-</span></span><span style=display:flex><span>        <span style=color:#f92672>ports</span>:
-</span></span><span style=display:flex><span>        - <span style=color:#f92672>containerPort</span>: <span style=color:#ae81ff>80</span>
-</span></span><span style=display:flex><span>      <span style=color:#f92672>nodeSelector</span>:
-</span></span><span style=display:flex><span>        <span style=color:#f92672>node-role.kubernetes.io/worker</span>: <span style=color:#e6db74>&#39;true&#39;</span> <span style=color:#75715e># We have many VMs in the Kubernetes cluster. </span>
-</span></span><span style=display:flex><span><span style=color:#ae81ff>We prefer all the pod running on certain VM, please add description below in my deployment. </span>
-</span></span><span style=display:flex><span><span style=color:#ae81ff>That will make pods running on our pre labeled K8S worker node.</span>
-</span></span><span style=display:flex><span>      <span style=color:#f92672>imagePullSecrets</span>:
-</span></span><span style=display:flex><span>        - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>my-registry-auth</span>
-</span></span></code></pre></div><ul><li><a href=https://kubernetes.io/docs/concepts/workloads/controllers/deployment/>https://kubernetes.io/docs/concepts/workloads/controllers/deployment/</a></li></ul><h2 id=service-ingress>Service, Ingress</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#f92672>apiVersion</span>: <span style=color:#ae81ff>v1</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>kind</span>: <span style=color:#ae81ff>Service</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>metadata</span>:
-</span></span><span style=display:flex><span>  <span style=color:#f92672>name</span>: <span style=color:#ae81ff>my-app-svc</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>namespace</span>: <span style=color:#ae81ff>team-a</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>spec</span>:
-</span></span><span style=display:flex><span>  <span style=color:#f92672>ports</span>:
-</span></span><span style=display:flex><span>    - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>http</span>
-</span></span><span style=display:flex><span>      <span style=color:#f92672>protocol</span>: <span style=color:#ae81ff>TCP</span>
-</span></span><span style=display:flex><span>      <span style=color:#f92672>port</span>: <span style=color:#ae81ff>80</span>
-</span></span><span style=display:flex><span>      <span style=color:#f92672>targetPort</span>: <span style=color:#ae81ff>80</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>selector</span>:
-</span></span><span style=display:flex><span>    <span style=color:#f92672>app</span>: <span style=color:#ae81ff>my-app</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>type</span>: <span style=color:#ae81ff>ClusterIP</span>
+</span></span></code></pre></div><h2 id=deployment-example-in-our-environment>Deployment example in our environment</h2><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>apiVersion: apps/v1
+</span></span><span style=display:flex><span>kind: Deployment
+</span></span><span style=display:flex><span>metadata:
+</span></span><span style=display:flex><span>  name: my-app
+</span></span><span style=display:flex><span>  namespace: team-a
+</span></span><span style=display:flex><span>spec:
+</span></span><span style=display:flex><span>  selector:
+</span></span><span style=display:flex><span>    matchLabels:
+</span></span><span style=display:flex><span>      app: my-app
+</span></span><span style=display:flex><span>  replicas: 1 <span style=color:green># tells deployment to run 2 pods matching the template</span>
+</span></span><span style=display:flex><span>  template:
+</span></span><span style=display:flex><span>    metadata:
+</span></span><span style=display:flex><span>      labels:
+</span></span><span style=display:flex><span>        app: my-app
+</span></span><span style=display:flex><span>    spec:
+</span></span><span style=display:flex><span>      containers:
+</span></span><span style=display:flex><span>      - name: my-app
+</span></span><span style=display:flex><span>        image: my-registry/my-app:0.0.1
+</span></span><span style=display:flex><span>        ports:
+</span></span><span style=display:flex><span>        - containerPort: 80
+</span></span><span style=display:flex><span>      nodeSelector:
+</span></span><span style=display:flex><span>        node-role.kubernetes.io/worker: <span style=color:#a31515>&#39;true&#39;</span> <span style=color:green># We have many VMs in the Kubernetes cluster. </span>
+</span></span><span style=display:flex><span>We prefer all the pod running on certain VM, please add description below in my deployment. 
+</span></span><span style=display:flex><span>That will make pods running on our pre labeled K8S worker node.
+</span></span><span style=display:flex><span>      imagePullSecrets:
+</span></span><span style=display:flex><span>        - name: my-registry-auth
+</span></span></code></pre></div><ul><li><a href=https://kubernetes.io/docs/concepts/workloads/controllers/deployment/>https://kubernetes.io/docs/concepts/workloads/controllers/deployment/</a></li></ul><h2 id=service-ingress>Service, Ingress</h2><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>apiVersion: v1
+</span></span><span style=display:flex><span>kind: Service
+</span></span><span style=display:flex><span>metadata:
+</span></span><span style=display:flex><span>  name: my-app-svc
+</span></span><span style=display:flex><span>  namespace: team-a
+</span></span><span style=display:flex><span>spec:
+</span></span><span style=display:flex><span>  ports:
+</span></span><span style=display:flex><span>    - name: http
+</span></span><span style=display:flex><span>      protocol: TCP
+</span></span><span style=display:flex><span>      port: 80
+</span></span><span style=display:flex><span>      targetPort: 80
+</span></span><span style=display:flex><span>  selector:
+</span></span><span style=display:flex><span>    app: my-app
+</span></span><span style=display:flex><span>  type: ClusterIP
 </span></span><span style=display:flex><span>---
-</span></span><span style=display:flex><span><span style=color:#f92672>apiVersion</span>: <span style=color:#ae81ff>extensions/v1beta1</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>kind</span>: <span style=color:#ae81ff>Ingress</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>metadata</span>:
-</span></span><span style=display:flex><span>  <span style=color:#f92672>name</span>: <span style=color:#ae81ff>my-app-ingress</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>namespace</span>: <span style=color:#ae81ff>team-a</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>labels</span>:
-</span></span><span style=display:flex><span>    <span style=color:#f92672>app</span>: <span style=color:#ae81ff>my-app</span>
-</span></span><span style=display:flex><span>    <span style=color:#f92672>kubernetes.io/ingress.class</span>: <span style=color:#ae81ff>nginx</span>
-</span></span><span style=display:flex><span>    <span style=color:#f92672>nginx.ingress.kubernetes.io/use-regex</span>: <span style=color:#e6db74>&#39;true&#39;</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>spec</span>:
-</span></span><span style=display:flex><span>  <span style=color:#f92672>rules</span>:
-</span></span><span style=display:flex><span>    - <span style=color:#f92672>host</span>: <span style=color:#ae81ff>my-app.deltaww.com</span>
-</span></span><span style=display:flex><span>      <span style=color:#f92672>http</span>:
-</span></span><span style=display:flex><span>        <span style=color:#f92672>paths</span>:
-</span></span><span style=display:flex><span>          - <span style=color:#f92672>path</span>: <span style=color:#ae81ff>/prefix(/|$)(.*)</span>
-</span></span><span style=display:flex><span>            <span style=color:#f92672>backend</span>:
-</span></span><span style=display:flex><span>              <span style=color:#f92672>serviceName</span>: <span style=color:#ae81ff>my-app-svc</span>
-</span></span><span style=display:flex><span>              <span style=color:#f92672>servicePort</span>: <span style=color:#ae81ff>80</span>
+</span></span><span style=display:flex><span>apiVersion: extensions/v1beta1
+</span></span><span style=display:flex><span>kind: Ingress
+</span></span><span style=display:flex><span>metadata:
+</span></span><span style=display:flex><span>  name: my-app-ingress
+</span></span><span style=display:flex><span>  namespace: team-a
+</span></span><span style=display:flex><span>  labels:
+</span></span><span style=display:flex><span>    app: my-app
+</span></span><span style=display:flex><span>    kubernetes.io/ingress.class: nginx
+</span></span><span style=display:flex><span>    nginx.ingress.kubernetes.io/use-regex: <span style=color:#a31515>&#39;true&#39;</span>
+</span></span><span style=display:flex><span>spec:
+</span></span><span style=display:flex><span>  rules:
+</span></span><span style=display:flex><span>    - host: my-app.deltaww.com
+</span></span><span style=display:flex><span>      http:
+</span></span><span style=display:flex><span>        paths:
+</span></span><span style=display:flex><span>          - path: /prefix(/|$)(.*)
+</span></span><span style=display:flex><span>            backend:
+</span></span><span style=display:flex><span>              serviceName: my-app-svc
+</span></span><span style=display:flex><span>              servicePort: 80
 </span></span><span style=display:flex><span>---
-</span></span><span style=display:flex><span><span style=color:#f92672>apiVersion</span>: <span style=color:#ae81ff>extensions/v1beta1</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>kind</span>: <span style=color:#ae81ff>Ingress</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>metadata</span>:
-</span></span><span style=display:flex><span>  <span style=color:#f92672>name</span>: <span style=color:#ae81ff>my-domain-ingress</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>namespace</span>: <span style=color:#ae81ff>team-a</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>labels</span>:
-</span></span><span style=display:flex><span>    <span style=color:#f92672>app</span>: <span style=color:#ae81ff>my-domain</span>
-</span></span><span style=display:flex><span>    <span style=color:#f92672>kubernetes.io/ingress.class</span>: <span style=color:#ae81ff>nginx</span>
-</span></span><span style=display:flex><span>    <span style=color:#f92672>nginx.ingress.kubernetes.io/use-regex</span>: <span style=color:#e6db74>&#39;true&#39;</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>spec</span>:
-</span></span><span style=display:flex><span>  <span style=color:#f92672>tls</span>:
-</span></span><span style=display:flex><span>    - <span style=color:#f92672>hosts</span>:
-</span></span><span style=display:flex><span>        - <span style=color:#ae81ff>my-domain.com</span>
-</span></span><span style=display:flex><span>      <span style=color:#f92672>secretName</span>: <span style=color:#ae81ff>my-tls</span> <span style=color:#75715e># please make sure there&#39;s an existed K8S secret in </span>
-</span></span><span style=display:flex><span><span style=color:#ae81ff>the same namespace</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>rules</span>:
-</span></span><span style=display:flex><span>    - <span style=color:#f92672>host</span>: <span style=color:#ae81ff>my-domain.com</span>
-</span></span><span style=display:flex><span>      <span style=color:#f92672>http</span>:
-</span></span><span style=display:flex><span>        <span style=color:#f92672>paths</span>:
-</span></span><span style=display:flex><span>          - <span style=color:#f92672>path</span>: <span style=color:#ae81ff>/prefix(/|$)(.*)</span>
-</span></span><span style=display:flex><span>            <span style=color:#f92672>backend</span>:
-</span></span><span style=display:flex><span>              <span style=color:#f92672>serviceName</span>: <span style=color:#ae81ff>my-app-svc</span>
-</span></span><span style=display:flex><span>              <span style=color:#f92672>servicePort</span>: <span style=color:#ae81ff>80</span>
-</span></span></code></pre></div><ul><li><a href=https://kubernetes.io/docs/concepts/services-networking/service/>https://kubernetes.io/docs/concepts/services-networking/service/</a></li><li><a href=https://kubernetes.io/docs/concepts/services-networking/ingress/>https://kubernetes.io/docs/concepts/services-networking/ingress/</a></li></ul><h2 id=pvc>PVC</h2><p>Here&rsquo;s a PVC resource example.</p><p>The storageClassName describe below, rook-ceph is installed in our self-host environment. If you application is running on other Kubernetes cluster, please contact administrator.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#f92672>apiVersion</span>: <span style=color:#ae81ff>v1</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>kind</span>: <span style=color:#ae81ff>PersistentVolumeClaim</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>metadata</span>:
-</span></span><span style=display:flex><span>  <span style=color:#f92672>name</span>: <span style=color:#ae81ff>my-app-logs-pvc</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>namespace</span>: <span style=color:#ae81ff>team-a</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>labels</span>:
-</span></span><span style=display:flex><span>    <span style=color:#f92672>app</span>: <span style=color:#ae81ff>my-app-logs-pvc</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>spec</span>:
-</span></span><span style=display:flex><span>  <span style=color:#f92672>accessModes</span>:
-</span></span><span style=display:flex><span>    - <span style=color:#ae81ff>ReadWriteOnce</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>resources</span>:
-</span></span><span style=display:flex><span>    <span style=color:#f92672>requests</span>:
-</span></span><span style=display:flex><span>      <span style=color:#f92672>storage</span>: <span style=color:#ae81ff>10Gi</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>storageClassName</span>: <span style=color:#ae81ff>rook-ceph-block</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>volumeMode</span>: <span style=color:#ae81ff>Filesystem</span>
-</span></span></code></pre></div><p>Here&rsquo;s an example for logging file path mounting PVC</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#f92672>apiVersion</span>: <span style=color:#ae81ff>v1</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>kind</span>: <span style=color:#ae81ff>Pod</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>metadata</span>:
-</span></span><span style=display:flex><span>  <span style=color:#f92672>name</span>: <span style=color:#ae81ff>my-app2</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>namespace</span>: <span style=color:#ae81ff>team-a</span>
-</span></span><span style=display:flex><span><span style=color:#f92672>spec</span>:
-</span></span><span style=display:flex><span>  <span style=color:#f92672>volumes</span>:
-</span></span><span style=display:flex><span>    - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>my-app-logs-storage</span>
-</span></span><span style=display:flex><span>      <span style=color:#f92672>persistentVolumeClaim</span>:
-</span></span><span style=display:flex><span>        <span style=color:#f92672>claimName</span>: <span style=color:#ae81ff>my-app-logs-pvc</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>containers</span>:
-</span></span><span style=display:flex><span>    - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>my-app2</span>
-</span></span><span style=display:flex><span>      <span style=color:#f92672>image</span>: <span style=color:#ae81ff>my-registry.com/my-app:0.0.1</span>
-</span></span><span style=display:flex><span>      <span style=color:#f92672>volumeMounts</span>:
-</span></span><span style=display:flex><span>        - <span style=color:#f92672>mountPath</span>: <span style=color:#e6db74>&#34;/app/logs&#34;</span>
-</span></span><span style=display:flex><span>          <span style=color:#f92672>name</span>: <span style=color:#ae81ff>my-app-logs-storage</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>nodeSelector</span>:
-</span></span><span style=display:flex><span>    <span style=color:#f92672>node-role.kubernetes.io/worker</span>: <span style=color:#e6db74>&#39;true&#39;</span> <span style=color:#75715e># We have many VMs in the Kubernetes cluster. We </span>
-</span></span><span style=display:flex><span><span style=color:#ae81ff>prefer all the pod running on certain VM, please add description below in my deployment. </span>
-</span></span><span style=display:flex><span><span style=color:#ae81ff>That will make pods running on our pre labeled K8S worker node.</span>
-</span></span><span style=display:flex><span>  <span style=color:#f92672>imagePullSecrets</span>:
-</span></span><span style=display:flex><span>    - <span style=color:#f92672>name</span>: <span style=color:#ae81ff>my-registry-auth</span>
-</span></span></code></pre></div><ul><li><a href=https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/>https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/</a></li></ul></div></main><script async src="https://www.googletagmanager.com/gtag/js?id=G-3SNCDP141D"></script>
+</span></span><span style=display:flex><span>apiVersion: extensions/v1beta1
+</span></span><span style=display:flex><span>kind: Ingress
+</span></span><span style=display:flex><span>metadata:
+</span></span><span style=display:flex><span>  name: my-domain-ingress
+</span></span><span style=display:flex><span>  namespace: team-a
+</span></span><span style=display:flex><span>  labels:
+</span></span><span style=display:flex><span>    app: my-domain
+</span></span><span style=display:flex><span>    kubernetes.io/ingress.class: nginx
+</span></span><span style=display:flex><span>    nginx.ingress.kubernetes.io/use-regex: <span style=color:#a31515>&#39;true&#39;</span>
+</span></span><span style=display:flex><span>spec:
+</span></span><span style=display:flex><span>  tls:
+</span></span><span style=display:flex><span>    - hosts:
+</span></span><span style=display:flex><span>        - my-domain.com
+</span></span><span style=display:flex><span>      secretName: my-tls <span style=color:green># please make sure there&#39;s an existed K8S secret in </span>
+</span></span><span style=display:flex><span>the same namespace
+</span></span><span style=display:flex><span>  rules:
+</span></span><span style=display:flex><span>    - host: my-domain.com
+</span></span><span style=display:flex><span>      http:
+</span></span><span style=display:flex><span>        paths:
+</span></span><span style=display:flex><span>          - path: /prefix(/|$)(.*)
+</span></span><span style=display:flex><span>            backend:
+</span></span><span style=display:flex><span>              serviceName: my-app-svc
+</span></span><span style=display:flex><span>              servicePort: 80
+</span></span></code></pre></div><ul><li><a href=https://kubernetes.io/docs/concepts/services-networking/service/>https://kubernetes.io/docs/concepts/services-networking/service/</a></li><li><a href=https://kubernetes.io/docs/concepts/services-networking/ingress/>https://kubernetes.io/docs/concepts/services-networking/ingress/</a></li></ul><h2 id=pvc>PVC</h2><p>Here&rsquo;s a PVC resource example.</p><p>The storageClassName describe below, rook-ceph is installed in our self-host environment. If you application is running on other Kubernetes cluster, please contact administrator.</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>apiVersion: v1
+</span></span><span style=display:flex><span>kind: PersistentVolumeClaim
+</span></span><span style=display:flex><span>metadata:
+</span></span><span style=display:flex><span>  name: my-app-logs-pvc
+</span></span><span style=display:flex><span>  namespace: team-a
+</span></span><span style=display:flex><span>  labels:
+</span></span><span style=display:flex><span>    app: my-app-logs-pvc
+</span></span><span style=display:flex><span>spec:
+</span></span><span style=display:flex><span>  accessModes:
+</span></span><span style=display:flex><span>    - ReadWriteOnce
+</span></span><span style=display:flex><span>  resources:
+</span></span><span style=display:flex><span>    requests:
+</span></span><span style=display:flex><span>      storage: 10Gi
+</span></span><span style=display:flex><span>  storageClassName: rook-ceph-block
+</span></span><span style=display:flex><span>  volumeMode: Filesystem
+</span></span></code></pre></div><p>Here&rsquo;s an example for logging file path mounting PVC</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>apiVersion: v1
+</span></span><span style=display:flex><span>kind: Pod
+</span></span><span style=display:flex><span>metadata:
+</span></span><span style=display:flex><span>  name: my-app2
+</span></span><span style=display:flex><span>  namespace: team-a
+</span></span><span style=display:flex><span>spec:
+</span></span><span style=display:flex><span>  volumes:
+</span></span><span style=display:flex><span>    - name: my-app-logs-storage
+</span></span><span style=display:flex><span>      persistentVolumeClaim:
+</span></span><span style=display:flex><span>        claimName: my-app-logs-pvc
+</span></span><span style=display:flex><span>  containers:
+</span></span><span style=display:flex><span>    - name: my-app2
+</span></span><span style=display:flex><span>      image: my-registry.com/my-app:0.0.1
+</span></span><span style=display:flex><span>      volumeMounts:
+</span></span><span style=display:flex><span>        - mountPath: <span style=color:#a31515>&#34;/app/logs&#34;</span>
+</span></span><span style=display:flex><span>          name: my-app-logs-storage
+</span></span><span style=display:flex><span>  nodeSelector:
+</span></span><span style=display:flex><span>    node-role.kubernetes.io/worker: <span style=color:#a31515>&#39;true&#39;</span> <span style=color:green># We have many VMs in the Kubernetes cluster. We </span>
+</span></span><span style=display:flex><span>prefer all the pod running on certain VM, please add description below in my deployment. 
+</span></span><span style=display:flex><span>That will make pods running on our pre labeled K8S worker node.
+</span></span><span style=display:flex><span>  imagePullSecrets:
+</span></span><span style=display:flex><span>    - name: my-registry-auth
+</span></span></code></pre></div><ul><li><a href=https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/>https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/</a></li></ul></div></div></div></article></main></div><script crossorigin=anonymous integrity=sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa src=https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3SNCDP141D"></script>
 <script>var doNotTrack=!1;if(!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-3SNCDP141D",{anonymize_ip:!1})}</script></body></html>
