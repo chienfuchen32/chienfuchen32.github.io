@@ -1,6 +1,6 @@
 baseurl: 'https://chienfuchen32.github.io/'
 languagecode: 'en-us'
-title: 'New Blog'
+title: "Jeff's note"
 theme: "paige"
 
 enablerobotstxt: true
