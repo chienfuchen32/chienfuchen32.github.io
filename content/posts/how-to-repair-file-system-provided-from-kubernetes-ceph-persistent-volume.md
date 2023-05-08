@@ -2,6 +2,7 @@
 title: "How to Repair File System Provided From Kubernetes Ceph Persistent Volume"
 date: 2023-05-06T09:29:38+08:00
 draft: true
+tags: ["Kubernetes", "Ingress", "CSI"]
 ---
 # How to repair file system provided from Kubernetes ceph persistent volume 
 某日由於底層VM出現硬體故障，整座自建的Kubernetes接受影響，
