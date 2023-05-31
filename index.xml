@@ -1,4 +1,95 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Jeff's note</title><link>https://chienfuchen32.github.io/</link><description>Recent content in Jeff's note</description><language>en-us</language><lastBuildDate>Sat, 06 May 2023 09:29:38 +0800</lastBuildDate><atom:link href="https://chienfuchen32.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>How to Repair File System Provided From Kubernetes Ceph Persistent Volume</title><link>https://chienfuchen32.github.io/posts/how-to-repair-file-system-provided-from-kubernetes-ceph-persistent-volume/</link><guid>https://chienfuchen32.github.io/posts/how-to-repair-file-system-provided-from-kubernetes-ceph-persistent-volume/</guid><pubDate>Sat, 06 May 2023 09:29:38 +0800</pubDate><description><![CDATA[<h1 id="how-to-repair-file-system-provided-from-kubernetes-ceph-persistent-volume">How to repair file system provided from Kubernetes ceph persistent volume</h1>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Jeff's note</title><link>https://chienfuchen32.github.io/</link><description>Recent content in Jeff's note</description><language>en-us</language><lastBuildDate>Wed, 31 May 2023 20:10:53 +0800</lastBuildDate><atom:link href="https://chienfuchen32.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>Least Recently Used Cache</title><link>https://chienfuchen32.github.io/posts/least-recently-used--cache/</link><guid>https://chienfuchen32.github.io/posts/least-recently-used--cache/</guid><pubDate>Wed, 31 May 2023 20:10:53 +0800</pubDate><description><![CDATA[<h2 id="purpose">Purpose</h2>
+<p>TODO</p>
+<h2 id="example-from-leetcode-146-lru-cache">Example from LeetCode 146. LRU Cache</h2>
+<p><a href="https://leetcode.com/problems/lru-cache/">problem link</a></p>
+<h3 id="implementation">Implementation</h3>
+<p>TODO commemt</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python3" data-lang="python3"><span style="display:flex;"><span><span style="color:#00f">class</span> <span style="color:#2b91af">Node</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#00f">def</span> __init__(self, key, value, prev=<span style="color:#00f">None</span>, nxt=<span style="color:#00f">None</span>):
+</span></span><span style="display:flex;"><span>        self.key = key
+</span></span><span style="display:flex;"><span>        self.value = value
+</span></span><span style="display:flex;"><span>        self.prev = prev
+</span></span><span style="display:flex;"><span>        self.next = nxt
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#00f">class</span> <span style="color:#2b91af">DoubleLinkList</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#00f">def</span> __init__(self):
+</span></span><span style="display:flex;"><span>        self.head = <span style="color:#00f">None</span>
+</span></span><span style="display:flex;"><span>        self.tail = <span style="color:#00f">None</span>
+</span></span><span style="display:flex;"><span>        self.length = 0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00f">def</span> add_node_to_tail(self, node: Node) -&gt; <span style="color:#00f">None</span>:
+</span></span><span style="display:flex;"><span>        self.length += 1
+</span></span><span style="display:flex;"><span>        <span style="color:#00f">if</span> self.head <span style="color:#00f">is</span> <span style="color:#00f">None</span>:
+</span></span><span style="display:flex;"><span>            self.head = node
+</span></span><span style="display:flex;"><span>            <span style="color:#00f">return</span> 
+</span></span><span style="display:flex;"><span>        <span style="color:#00f">if</span> self.tail <span style="color:#00f">is</span> <span style="color:#00f">None</span>:
+</span></span><span style="display:flex;"><span>            self.tail = node
+</span></span><span style="display:flex;"><span>            self.tail.prev = self.head
+</span></span><span style="display:flex;"><span>            self.head.next = self.tail
+</span></span><span style="display:flex;"><span>            <span style="color:#00f">return</span>
+</span></span><span style="display:flex;"><span>        self.tail.next = node
+</span></span><span style="display:flex;"><span>        node.prev = self.tail
+</span></span><span style="display:flex;"><span>        self.tail = node
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00f">def</span> remove_node_from_head(self) -&gt; int:
+</span></span><span style="display:flex;"><span>        self.length -= 1
+</span></span><span style="display:flex;"><span>        old_key = self.head.key
+</span></span><span style="display:flex;"><span>        self.head = self.head.next
+</span></span><span style="display:flex;"><span>        <span style="color:#00f">if</span> self.head <span style="color:#00f">is</span> <span style="color:#00f">not</span> <span style="color:#00f">None</span>:
+</span></span><span style="display:flex;"><span>            self.head.prev = <span style="color:#00f">None</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#00f">return</span> old_key
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00f">def</span> remove_node_from_node(self, node) -&gt; <span style="color:#00f">None</span>:
+</span></span><span style="display:flex;"><span>        self.length -= 1
+</span></span><span style="display:flex;"><span>        <span style="color:#00f">if</span> node.prev <span style="color:#00f">is</span> <span style="color:#00f">not</span> <span style="color:#00f">None</span>:
+</span></span><span style="display:flex;"><span>            node.prev.next = node.next
+</span></span><span style="display:flex;"><span>        <span style="color:#00f">if</span> node.next <span style="color:#00f">is</span> <span style="color:#00f">not</span> <span style="color:#00f">None</span>:
+</span></span><span style="display:flex;"><span>            node.next.prev = node.prev
+</span></span><span style="display:flex;"><span>        <span style="color:#00f">if</span> node == self.tail:
+</span></span><span style="display:flex;"><span>            <span style="color:#00f">if</span> self.tail.prev <span style="color:#00f">is</span> <span style="color:#00f">not</span> <span style="color:#00f">None</span>:
+</span></span><span style="display:flex;"><span>                self.tail.prev.next = <span style="color:#00f">None</span>
+</span></span><span style="display:flex;"><span>            self.tail = self.tail.prev
+</span></span><span style="display:flex;"><span>        <span style="color:#00f">if</span> node == self.head:
+</span></span><span style="display:flex;"><span>            <span style="color:#00f">if</span> self.head.next <span style="color:#00f">is</span> <span style="color:#00f">not</span> <span style="color:#00f">None</span>:
+</span></span><span style="display:flex;"><span>                self.head.next.prev = <span style="color:#00f">None</span>
+</span></span><span style="display:flex;"><span>            self.head = self.head.next
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00f">def</span> print_all_node(self) -&gt; <span style="color:#00f">None</span>:
+</span></span><span style="display:flex;"><span>        ptr = self.head
+</span></span><span style="display:flex;"><span>        <span style="color:#00f">while</span> ptr <span style="color:#00f">is</span> <span style="color:#00f">not</span> <span style="color:#00f">None</span>:
+</span></span><span style="display:flex;"><span>            ptr = ptr.next
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#00f">class</span> <span style="color:#2b91af">LRUCache</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#00f">def</span> __init__(self, capacity: int):
+</span></span><span style="display:flex;"><span>        self.cache = {} <span style="color:#008000"># {key: Node}</span>
+</span></span><span style="display:flex;"><span>        self.link_list = DoubleLinkList()
+</span></span><span style="display:flex;"><span>        self.capacity = capacity
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00f">def</span> get(self, key: int) -&gt; int:
+</span></span><span style="display:flex;"><span>        <span style="color:#00f">if</span> self.cache.get(key, <span style="color:#00f">None</span>) <span style="color:#00f">is</span> <span style="color:#00f">not</span> <span style="color:#00f">None</span>:
+</span></span><span style="display:flex;"><span>            node = self.cache[key]
+</span></span><span style="display:flex;"><span>            value = node.value
+</span></span><span style="display:flex;"><span>            new_node = Node(key, value)
+</span></span><span style="display:flex;"><span>            self.link_list.remove_node_from_node(node)
+</span></span><span style="display:flex;"><span>            self.cache[key] = new_node
+</span></span><span style="display:flex;"><span>            self.link_list.add_node_to_tail(new_node)
+</span></span><span style="display:flex;"><span>            <span style="color:#00f">return</span> value
+</span></span><span style="display:flex;"><span>        <span style="color:#00f">return</span> -1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00f">def</span> put(self, key: int, value: int) -&gt; <span style="color:#00f">None</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#00f">if</span> self.cache.get(key, <span style="color:#00f">None</span>) <span style="color:#00f">is</span> <span style="color:#00f">not</span> <span style="color:#00f">None</span>:
+</span></span><span style="display:flex;"><span>            node = self.cache[key]
+</span></span><span style="display:flex;"><span>            <span style="color:#00f">del</span> self.cache[key]
+</span></span><span style="display:flex;"><span>            self.link_list.remove_node_from_node(node)
+</span></span><span style="display:flex;"><span>        <span style="color:#00f">else</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#00f">if</span> self.link_list.length &gt;= self.capacity:
+</span></span><span style="display:flex;"><span>                head_key = self.link_list.remove_node_from_head()
+</span></span><span style="display:flex;"><span>                <span style="color:#00f">del</span> self.cache[head_key]
+</span></span><span style="display:flex;"><span>        new_node = Node(key, value)
+</span></span><span style="display:flex;"><span>        self.cache[key] = new_node
+</span></span><span style="display:flex;"><span>        self.link_list.add_node_to_tail(new_node)
+</span></span></code></pre></div>]]></description></item><item><title>How to Repair File System Provided From Kubernetes Ceph Persistent Volume</title><link>https://chienfuchen32.github.io/posts/how-to-repair-file-system-provided-from-kubernetes-ceph-persistent-volume/</link><guid>https://chienfuchen32.github.io/posts/how-to-repair-file-system-provided-from-kubernetes-ceph-persistent-volume/</guid><pubDate>Sat, 06 May 2023 09:29:38 +0800</pubDate><description><![CDATA[<h1 id="how-to-repair-file-system-provided-from-kubernetes-ceph-persistent-volume">How to repair file system provided from Kubernetes ceph persistent volume</h1>
 <p>某日由於底層VM出現硬體故障，整座自建的Kubernetes接受影響，
 部署於該環境的應用MySQL無法掛載pv，從pod出現的錯誤訊息如下:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>MountVolume.SetUp failed <span style="color:#00f">for</span> volume <span style="color:#a31515">&#34;pvc-78cf22fa-d776-43a4-98d7-d594f02ea018&#34;</span> : mount command failed, status: Failure, reason: failed to mount volume /dev/rbd13 [xfs] to /var/lib/kubelet/plugins/ceph.rook.io/rook-ceph/mounts/pvc-78cf22fa-d776-43a4-98d7-d594f02ea018, error mount failed: exit status 32 Mounting command: systemd-run Mounting arguments: --description=Kubernetes transient mount <span style="color:#00f">for</span> /var/lib/kubelet/plugins/ceph.rook.io/rook-ceph/mounts/pvc-78cf22fa-d776-43a4-98d7-d594f02ea018 --scope -- mount -t xfs -o rw,defaults /dev/rbd13 /var/lib/kubelet/plugins/ceph.rook.io/rook-ceph/mounts/pvc-78cf22fa-d776-43a4-98d7-d594f02ea018 Output: Running scope as unit run-r2594d6c82152421c8891bfa8761e8c05.scope. mount: mount /dev/rbd13 on /var/lib/kubelet/plugins/ceph.rook.io/rook-ceph/mounts/pvc-78cf22fa-d776-43a4-98d7-d594f02ea018 failed: Structure needs cleaning
