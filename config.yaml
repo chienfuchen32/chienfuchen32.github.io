@@ -12,7 +12,7 @@ markup:
     style: vs
 
 # Google Analytics 4
-googleAnalytics: "G-3SNCDP141D"
+googleAnalytics: "G-LR5QZYBPT2"
 
 menu:
   main:
@@ -25,5 +25,6 @@ paginate: 50
 
 social:
   github: https://github.com/chienfuchen32
+  gitlab: https://gitlab.com/chienfuchen32
   linkedin: https://www.linkedin.com/in/chienfuchen32
 
