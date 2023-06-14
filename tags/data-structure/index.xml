@@ -1,4 +1,77 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Data Structure · Jeff's note</title><link>https://chienfuchen32.github.io/tags/data-structure/</link><description>Recent content in Data Structure · Jeff's note</description><language>en-us</language><lastBuildDate>Wed, 31 May 2023 20:10:53 +0800</lastBuildDate><atom:link href="https://chienfuchen32.github.io/tags/data-structure/index.xml" rel="self" type="application/rss+xml"/><item><title>Least Recently Used Cache</title><link>https://chienfuchen32.github.io/posts/least-recently-used--cache/</link><guid>https://chienfuchen32.github.io/posts/least-recently-used--cache/</guid><pubDate>Wed, 31 May 2023 20:10:53 +0800</pubDate><description><![CDATA[<h2 id="purpose">Purpose</h2>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Data Structure · Jeff's note</title><link>https://chienfuchen32.github.io/tags/data-structure/</link><description>Recent content in Data Structure · Jeff's note</description><language>en-us</language><lastBuildDate>Wed, 14 Jun 2023 20:13:52 +0800</lastBuildDate><atom:link href="https://chienfuchen32.github.io/tags/data-structure/index.xml" rel="self" type="application/rss+xml"/><item><title>N Queen Problem</title><link>https://chienfuchen32.github.io/posts/n-queen-problem/</link><guid>https://chienfuchen32.github.io/posts/n-queen-problem/</guid><pubDate>Wed, 14 Jun 2023 20:13:52 +0800</pubDate><description><![CDATA[<h2 id="purpose">Purpose</h2>
+<p>TODO</p>
+<h2 id="example-from-leetcode-51-n-queens">Example from LeetCode 51. N-Queens</h2>
+<p><a href="https://leetcode.com/problems/n-queens/description/">problem link</a></p>
+<h3 id="implementation">Implementation</h3>
+<p>Backtracking all possible placement, check if it is queen attack range.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python3" data-lang="python3"><span style="display:flex;"><span><span style="color:#00f">class</span> <span style="color:#2b91af">Solution</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#00f">def</span> solveNQueens(self, n: int) -&gt; List[List[str]]:
+</span></span><span style="display:flex;"><span>        place = [-1 <span style="color:#00f">for</span> _ <span style="color:#00f">in</span> range(n)]
+</span></span><span style="display:flex;"><span>        row = 0
+</span></span><span style="display:flex;"><span>        place[0] = 0
+</span></span><span style="display:flex;"><span>        ans = []
+</span></span><span style="display:flex;"><span>        <span style="color:#00f">while</span> <span style="color:#00f">True</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#00f">if</span> self.is_valid(place, n) <span style="color:#00f">is</span> <span style="color:#00f">True</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#00f">if</span> row == n - 1:
+</span></span><span style="display:flex;"><span>                    ans.append([<span style="color:#a31515">&#39;&#39;</span>.join(b <span style="color:#00f">for</span> b <span style="color:#00f">in</span> self.board[i])
+</span></span><span style="display:flex;"><span>                            <span style="color:#00f">for</span> i <span style="color:#00f">in</span> range(n)])
+</span></span><span style="display:flex;"><span>                <span style="color:#00f">else</span>:
+</span></span><span style="display:flex;"><span>                    row += 1
+</span></span><span style="display:flex;"><span>            <span style="color:#00f">for</span> j <span style="color:#00f">in</span> range(row, -1, -1):
+</span></span><span style="display:flex;"><span>                <span style="color:#00f">if</span> place[j] == n - 1:
+</span></span><span style="display:flex;"><span>                    place[j] = -1
+</span></span><span style="display:flex;"><span>                    row -= 1
+</span></span><span style="display:flex;"><span>                <span style="color:#00f">else</span>:
+</span></span><span style="display:flex;"><span>                    place[j] += 1
+</span></span><span style="display:flex;"><span>                    <span style="color:#00f">break</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#00f">if</span> j == 0 <span style="color:#00f">and</span> place[j] == -1:
+</span></span><span style="display:flex;"><span>                    <span style="color:#00f">return</span> ans
+</span></span><span style="display:flex;"><span>            <span style="color:#00f">else</span>:
+</span></span><span style="display:flex;"><span>                place[row] += 1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#00f">def</span> is_valid(self, place, n)-&gt;bool:
+</span></span><span style="display:flex;"><span>        self.board = [[<span style="color:#a31515">&#39;.&#39;</span> <span style="color:#00f">for</span> _ <span style="color:#00f">in</span> range(n)] <span style="color:#00f">for</span> _ <span style="color:#00f">in</span> range(n)]
+</span></span><span style="display:flex;"><span>        <span style="color:#00f">for</span> i <span style="color:#00f">in</span> range(n):
+</span></span><span style="display:flex;"><span>            <span style="color:#00f">if</span> place[i] != -1:
+</span></span><span style="display:flex;"><span>                self.board[i][place[i]] = <span style="color:#a31515">&#39;Q&#39;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#008000"># row and col</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#00f">for</span> i <span style="color:#00f">in</span> range(n):
+</span></span><span style="display:flex;"><span>            <span style="color:#00f">for</span> j <span style="color:#00f">in</span> range(i+1, n):
+</span></span><span style="display:flex;"><span>                <span style="color:#00f">if</span> place[j] != -1 <span style="color:#00f">and</span> place[i] == place[j]:
+</span></span><span style="display:flex;"><span>                    <span style="color:#00f">return</span> <span style="color:#00f">False</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#008000"># cross</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#00f">for</span> i <span style="color:#00f">in</span> range(n):
+</span></span><span style="display:flex;"><span>            <span style="color:#00f">if</span> place[i] == -1:
+</span></span><span style="display:flex;"><span>                <span style="color:#00f">continue</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#00f">for</span> j <span style="color:#00f">in</span> range(n):
+</span></span><span style="display:flex;"><span>                <span style="color:#00f">if</span> j == 0:
+</span></span><span style="display:flex;"><span>                    <span style="color:#00f">continue</span>
+</span></span><span style="display:flex;"><span>                o = i + j
+</span></span><span style="display:flex;"><span>                p = place[i] + j
+</span></span><span style="display:flex;"><span>                <span style="color:#00f">if</span>  o &gt;= 0 <span style="color:#00f">and</span> o &lt; n <span style="color:#00f">and</span> \
+</span></span><span style="display:flex;"><span>                    p &gt;= 0 <span style="color:#00f">and</span> p &lt; n:
+</span></span><span style="display:flex;"><span>                    <span style="color:#00f">if</span> self.board[o][p] == <span style="color:#a31515">&#39;Q&#39;</span>:
+</span></span><span style="display:flex;"><span>                        <span style="color:#00f">return</span> <span style="color:#00f">False</span>
+</span></span><span style="display:flex;"><span>                o = i + j
+</span></span><span style="display:flex;"><span>                p = place[i] - j
+</span></span><span style="display:flex;"><span>                <span style="color:#00f">if</span>  o &gt;= 0 <span style="color:#00f">and</span> o &lt; n <span style="color:#00f">and</span> \
+</span></span><span style="display:flex;"><span>                    p &gt;= 0 <span style="color:#00f">and</span> p &lt; n:
+</span></span><span style="display:flex;"><span>                    <span style="color:#00f">if</span> self.board[o][p] == <span style="color:#a31515">&#39;Q&#39;</span>:
+</span></span><span style="display:flex;"><span>                        <span style="color:#00f">return</span> <span style="color:#00f">False</span>
+</span></span><span style="display:flex;"><span>                o = i - j
+</span></span><span style="display:flex;"><span>                p = place[i] + j
+</span></span><span style="display:flex;"><span>                <span style="color:#00f">if</span>  o &gt;= 0 <span style="color:#00f">and</span> o &lt; n <span style="color:#00f">and</span> \
+</span></span><span style="display:flex;"><span>                    p &gt;= 0 <span style="color:#00f">and</span> p &lt; n:
+</span></span><span style="display:flex;"><span>                    <span style="color:#00f">if</span> self.board[o][p] == <span style="color:#a31515">&#39;Q&#39;</span>:
+</span></span><span style="display:flex;"><span>                        <span style="color:#00f">return</span> <span style="color:#00f">False</span>
+</span></span><span style="display:flex;"><span>                o = i - j
+</span></span><span style="display:flex;"><span>                p = place[i] - j
+</span></span><span style="display:flex;"><span>                <span style="color:#00f">if</span>  o &gt;= 0 <span style="color:#00f">and</span> o &lt; n <span style="color:#00f">and</span> \
+</span></span><span style="display:flex;"><span>                    p &gt;= 0 <span style="color:#00f">and</span> p &lt; n:
+</span></span><span style="display:flex;"><span>                    <span style="color:#00f">if</span> self.board[o][p] == <span style="color:#a31515">&#39;Q&#39;</span>:
+</span></span><span style="display:flex;"><span>                        <span style="color:#00f">return</span> <span style="color:#00f">False</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#00f">return</span> <span style="color:#00f">True</span>
+</span></span></code></pre></div>]]></description></item><item><title>Least Recently Used Cache</title><link>https://chienfuchen32.github.io/posts/least-recently-used-cache/</link><guid>https://chienfuchen32.github.io/posts/least-recently-used-cache/</guid><pubDate>Wed, 31 May 2023 20:10:53 +0800</pubDate><description><![CDATA[<h2 id="purpose">Purpose</h2>
 <p>TODO</p>
 <h2 id="example-from-leetcode-146-lru-cache">Example from LeetCode 146. LRU Cache</h2>
 <p><a href="https://leetcode.com/problems/lru-cache/">problem link</a></p>

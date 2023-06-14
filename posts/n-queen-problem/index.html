@@ -1,0 +1,76 @@
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta content="Algorithm,Backtracking,Data Structure" name=keywords><meta content="width=device-width,initial-scale=1" name=viewport><meta property="og:title" content="N Queen Problem"><meta property="og:description" content="Purpose TODO
+Example from LeetCode 51. N-Queens problem link
+Implementation Backtracking all possible placement, check if it is queen attack range.
+class Solution: def solveNQueens(self, n: int) -> List[List[str]]: place = [-1 for _ in range(n)] row = 0 place[0] = 0 ans = [] while True: if self.is_valid(place, n) is True: if row == n - 1: ans.append([''.join(b for b in self.board[i]) for i in range(n)]) else: row += 1 for j in range(row, -1, -1): if place[j] == n - 1: place[j] = -1 row -= 1 else: place[j] += 1 break if j == 0 and place[j] == -1: return ans else: place[row] += 1 def is_valid(self, place, n)->bool: self."><meta property="og:type" content="article"><meta property="og:url" content="https://chienfuchen32.github.io/posts/n-queen-problem/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2023-06-14T20:13:52+08:00"><meta property="article:modified_time" content="2023-06-14T20:13:52+08:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="N Queen Problem"><meta name=twitter:description content="Purpose TODO
+Example from LeetCode 51. N-Queens problem link
+Implementation Backtracking all possible placement, check if it is queen attack range.
+class Solution: def solveNQueens(self, n: int) -> List[List[str]]: place = [-1 for _ in range(n)] row = 0 place[0] = 0 ans = [] while True: if self.is_valid(place, n) is True: if row == n - 1: ans.append([''.join(b for b in self.board[i]) for i in range(n)]) else: row += 1 for j in range(row, -1, -1): if place[j] == n - 1: place[j] = -1 row -= 1 else: place[j] += 1 break if j == 0 and place[j] == -1: return ans else: place[row] += 1 def is_valid(self, place, n)->bool: self."><title>N Queen Problem &#183; Jeff’s note</title><link crossorigin=anonymous href=https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css integrity=sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx rel=stylesheet><link crossorigin=anonymous href=https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css rel=stylesheet></head><body class="d-flex flex-column"><div class="container flex-fill"><header><div class=row><div class=col><nav class="d-flex justify-content-center my-3"><ul class="nav nav-pills"><li class=nav-item><a href=/about/ class=nav-link>About</a></li><li class=nav-item><a href=/posts/ class="nav-link active">Posts</a></li><li class=nav-item><a href=/tags/ class=nav-link>Tags</a></li></ul></nav></div></div></header><main><article><header><div class="justify-content-center row"><div class="col col-auto text-center"><div style=max-width:100ch><h1 class="display-5 fw-bold">N Queen Problem</h1><p class=text-muted><time datetime=2023-06-14>June 14, 2023</time></p></div></div></div></header><div class="justify-content-center row"><div class="col col-auto"><div style=max-width:66ch><h2 id=purpose>Purpose</h2><p>TODO</p><h2 id=example-from-leetcode-51-n-queens>Example from LeetCode 51. N-Queens</h2><p><a href=https://leetcode.com/problems/n-queens/description/>problem link</a></p><h3 id=implementation>Implementation</h3><p>Backtracking all possible placement, check if it is queen attack range.</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python3 data-lang=python3><span style=display:flex><span><span style=color:#00f>class</span> <span style=color:#2b91af>Solution</span>:
+</span></span><span style=display:flex><span>    <span style=color:#00f>def</span> solveNQueens(self, n: int) -&gt; List[List[str]]:
+</span></span><span style=display:flex><span>        place = [-1 <span style=color:#00f>for</span> _ <span style=color:#00f>in</span> range(n)]
+</span></span><span style=display:flex><span>        row = 0
+</span></span><span style=display:flex><span>        place[0] = 0
+</span></span><span style=display:flex><span>        ans = []
+</span></span><span style=display:flex><span>        <span style=color:#00f>while</span> <span style=color:#00f>True</span>:
+</span></span><span style=display:flex><span>            <span style=color:#00f>if</span> self.is_valid(place, n) <span style=color:#00f>is</span> <span style=color:#00f>True</span>:
+</span></span><span style=display:flex><span>                <span style=color:#00f>if</span> row == n - 1:
+</span></span><span style=display:flex><span>                    ans.append([<span style=color:#a31515>&#39;&#39;</span>.join(b <span style=color:#00f>for</span> b <span style=color:#00f>in</span> self.board[i])
+</span></span><span style=display:flex><span>                            <span style=color:#00f>for</span> i <span style=color:#00f>in</span> range(n)])
+</span></span><span style=display:flex><span>                <span style=color:#00f>else</span>:
+</span></span><span style=display:flex><span>                    row += 1
+</span></span><span style=display:flex><span>            <span style=color:#00f>for</span> j <span style=color:#00f>in</span> range(row, -1, -1):
+</span></span><span style=display:flex><span>                <span style=color:#00f>if</span> place[j] == n - 1:
+</span></span><span style=display:flex><span>                    place[j] = -1
+</span></span><span style=display:flex><span>                    row -= 1
+</span></span><span style=display:flex><span>                <span style=color:#00f>else</span>:
+</span></span><span style=display:flex><span>                    place[j] += 1
+</span></span><span style=display:flex><span>                    <span style=color:#00f>break</span>
+</span></span><span style=display:flex><span>                <span style=color:#00f>if</span> j == 0 <span style=color:#00f>and</span> place[j] == -1:
+</span></span><span style=display:flex><span>                    <span style=color:#00f>return</span> ans
+</span></span><span style=display:flex><span>            <span style=color:#00f>else</span>:
+</span></span><span style=display:flex><span>                place[row] += 1
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#00f>def</span> is_valid(self, place, n)-&gt;bool:
+</span></span><span style=display:flex><span>        self.board = [[<span style=color:#a31515>&#39;.&#39;</span> <span style=color:#00f>for</span> _ <span style=color:#00f>in</span> range(n)] <span style=color:#00f>for</span> _ <span style=color:#00f>in</span> range(n)]
+</span></span><span style=display:flex><span>        <span style=color:#00f>for</span> i <span style=color:#00f>in</span> range(n):
+</span></span><span style=display:flex><span>            <span style=color:#00f>if</span> place[i] != -1:
+</span></span><span style=display:flex><span>                self.board[i][place[i]] = <span style=color:#a31515>&#39;Q&#39;</span>
+</span></span><span style=display:flex><span>        <span style=color:green># row and col</span>
+</span></span><span style=display:flex><span>        <span style=color:#00f>for</span> i <span style=color:#00f>in</span> range(n):
+</span></span><span style=display:flex><span>            <span style=color:#00f>for</span> j <span style=color:#00f>in</span> range(i+1, n):
+</span></span><span style=display:flex><span>                <span style=color:#00f>if</span> place[j] != -1 <span style=color:#00f>and</span> place[i] == place[j]:
+</span></span><span style=display:flex><span>                    <span style=color:#00f>return</span> <span style=color:#00f>False</span>
+</span></span><span style=display:flex><span>        <span style=color:green># cross</span>
+</span></span><span style=display:flex><span>        <span style=color:#00f>for</span> i <span style=color:#00f>in</span> range(n):
+</span></span><span style=display:flex><span>            <span style=color:#00f>if</span> place[i] == -1:
+</span></span><span style=display:flex><span>                <span style=color:#00f>continue</span>
+</span></span><span style=display:flex><span>            <span style=color:#00f>for</span> j <span style=color:#00f>in</span> range(n):
+</span></span><span style=display:flex><span>                <span style=color:#00f>if</span> j == 0:
+</span></span><span style=display:flex><span>                    <span style=color:#00f>continue</span>
+</span></span><span style=display:flex><span>                o = i + j
+</span></span><span style=display:flex><span>                p = place[i] + j
+</span></span><span style=display:flex><span>                <span style=color:#00f>if</span>  o &gt;= 0 <span style=color:#00f>and</span> o &lt; n <span style=color:#00f>and</span> \
+</span></span><span style=display:flex><span>                    p &gt;= 0 <span style=color:#00f>and</span> p &lt; n:
+</span></span><span style=display:flex><span>                    <span style=color:#00f>if</span> self.board[o][p] == <span style=color:#a31515>&#39;Q&#39;</span>:
+</span></span><span style=display:flex><span>                        <span style=color:#00f>return</span> <span style=color:#00f>False</span>
+</span></span><span style=display:flex><span>                o = i + j
+</span></span><span style=display:flex><span>                p = place[i] - j
+</span></span><span style=display:flex><span>                <span style=color:#00f>if</span>  o &gt;= 0 <span style=color:#00f>and</span> o &lt; n <span style=color:#00f>and</span> \
+</span></span><span style=display:flex><span>                    p &gt;= 0 <span style=color:#00f>and</span> p &lt; n:
+</span></span><span style=display:flex><span>                    <span style=color:#00f>if</span> self.board[o][p] == <span style=color:#a31515>&#39;Q&#39;</span>:
+</span></span><span style=display:flex><span>                        <span style=color:#00f>return</span> <span style=color:#00f>False</span>
+</span></span><span style=display:flex><span>                o = i - j
+</span></span><span style=display:flex><span>                p = place[i] + j
+</span></span><span style=display:flex><span>                <span style=color:#00f>if</span>  o &gt;= 0 <span style=color:#00f>and</span> o &lt; n <span style=color:#00f>and</span> \
+</span></span><span style=display:flex><span>                    p &gt;= 0 <span style=color:#00f>and</span> p &lt; n:
+</span></span><span style=display:flex><span>                    <span style=color:#00f>if</span> self.board[o][p] == <span style=color:#a31515>&#39;Q&#39;</span>:
+</span></span><span style=display:flex><span>                        <span style=color:#00f>return</span> <span style=color:#00f>False</span>
+</span></span><span style=display:flex><span>                o = i - j
+</span></span><span style=display:flex><span>                p = place[i] - j
+</span></span><span style=display:flex><span>                <span style=color:#00f>if</span>  o &gt;= 0 <span style=color:#00f>and</span> o &lt; n <span style=color:#00f>and</span> \
+</span></span><span style=display:flex><span>                    p &gt;= 0 <span style=color:#00f>and</span> p &lt; n:
+</span></span><span style=display:flex><span>                    <span style=color:#00f>if</span> self.board[o][p] == <span style=color:#a31515>&#39;Q&#39;</span>:
+</span></span><span style=display:flex><span>                        <span style=color:#00f>return</span> <span style=color:#00f>False</span>
+</span></span><span style=display:flex><span>        <span style=color:#00f>return</span> <span style=color:#00f>True</span>
+</span></span></code></pre></div></div></div></div></article></main></div><script crossorigin=anonymous integrity=sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa src=https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LR5QZYBPT2"></script>
+<script>var doNotTrack=!1;if(!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-LR5QZYBPT2",{anonymize_ip:!1})}</script></body></html>
