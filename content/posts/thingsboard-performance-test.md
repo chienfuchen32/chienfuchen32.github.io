@@ -2,7 +2,7 @@
 title: "Thingsboard Performance Test"
 date: 2023-10-05T21:18:19+08:00
 draft: true
-tags: ["Kubernetes","Performance","Distributed System","High Availability"]
+tags: ["Kubernetes","Performance Test","Distributed System","High Availability","IoT", "Thingsboard"]
 ---
 ## Thingsboard
 * [Micro service Architecture](https://thingsboard.io/docs/reference/)
@@ -152,7 +152,7 @@ zookeeper-0                         1/1     Running   0          22h
 zookeeper-1                         1/1     Running   0          22h
 zookeeper-2                         1/1     Running   0          22h
 ```
-* Device Simulater Scenario: 45000 gateway, each gateway prepared 2 end device. Every device generate radomly distributed value for 3 different telemetry key `pulseCounter`, `leakage`, `batteryLevel` per second. Here it comes with [paho-mqtt](https://pypi.org/project/paho-mqtt/) to implement massive clients based on event loop async payload publish to Broker.
+* Device Simulater Scenario: 45000 gateway, each gateway prepared 2 end device. Every device generate radomly distributed value for 3 different telemetry key `pulseCounter`, `leakage`, `batteryLevel` per second. Here it comes with [paho-mqtt](https://pypi.org/project/paho-mqtt/) to implement massive clients based on event loop async payload publish to Broker. Expectedly thoughput would be (45000 + 90000 devices) * 3 telemetry / second = 405000 data point per second.
 ## Monitoring
 ### Kafka
 ```bash
@@ -1139,11 +1139,14 @@ Aggregation query used on multiple partition keys (IN restriction)
 
 ```
 ### Thingsboard Rule Chain 
+Message count rule node count each device publish telemetry once, here's a example to save to database every 60 second.
 <img src="/tb-perf/tb-rule-chain.png" width="1024">
 
 ### Thingsboard Dashboard
+This dashboard is according to the data provided from message count rule node which describe every tb-rule-engine JAVA instance processed in a short period of time.
 <img src="/tb-perf/tb-message-counter-dashboard.png" width="1024">
 
 ### Thingsboard API Usage
+API Usage page shows that summary of rule node status, micro service message processing metrics, ...etc.
 <img src="/tb-perf/tb-api-usage.png" width="1024">
 
