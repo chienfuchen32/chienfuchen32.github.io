@@ -149,7 +149,7 @@
 </span></span><span style="display:flex;"><span>zookeeper-1                         1/1     Running   0          22h
 </span></span><span style="display:flex;"><span>zookeeper-2                         1/1     Running   0          22h
 </span></span></code></pre></div><ul>
-<li>Device Simulater Scenario: 45000 gateway, each gateway prepared 2 end device. Every device generate radomly distributed value for 3 different telemetry key <code>pulseCounter</code>, <code>leakage</code>, <code>batteryLevel</code> per second. Here it comes with <a href="https://pypi.org/project/paho-mqtt/">paho-mqtt</a> to implement massive clients based on event loop async payload publish to Broker.</li>
+<li>Device Simulater Scenario: 45000 gateway, each gateway prepared 2 end device. Every device generate radomly distributed value for 3 different telemetry key <code>pulseCounter</code>, <code>leakage</code>, <code>batteryLevel</code> per second. Here it comes with <a href="https://pypi.org/project/paho-mqtt/">paho-mqtt</a> to implement massive clients based on event loop async payload publish to Broker. Expectedly thoughput would be (45000 + 90000 devices) * 3 telemetry / second = 405000 data point per second.</li>
 </ul>
 <h2 id="monitoring">Monitoring</h2>
 <h3 id="kafka">Kafka</h3>
@@ -1132,11 +1132,14 @@ cassandra@cqlsh:thingsboard&gt; SELECT COUNT(*) from ts_kv_cf WHERE entity_id=e8
 Warnings :
 Aggregation query used on multiple partition keys (IN restriction)
 </code></pre><h3 id="thingsboard-rule-chain">Thingsboard Rule Chain</h3>
-<img src="/tb-perf/tb-rule-chain.png" width="1024">
+<p>Message count rule node count each device publish telemetry once, here&rsquo;s a example to save to database every 60 second.
+<img src="/tb-perf/tb-rule-chain.png" width="1024"></p>
 <h3 id="thingsboard-dashboard">Thingsboard Dashboard</h3>
-<img src="/tb-perf/tb-message-counter-dashboard.png" width="1024">
+<p>This dashboard is according to the data provided from message count rule node which describe every tb-rule-engine JAVA instance processed in a short period of time.
+<img src="/tb-perf/tb-message-counter-dashboard.png" width="1024"></p>
 <h3 id="thingsboard-api-usage">Thingsboard API Usage</h3>
-<img src="/tb-perf/tb-api-usage.png" width="1024">
+<p>API Usage page shows that summary of rule node status, micro service message processing metrics, &hellip;etc.
+<img src="/tb-perf/tb-api-usage.png" width="1024"></p>
 ]]></description></item><item><title>How to Repair File System Provided From Kubernetes Ceph Persistent Volume</title><link>https://chienfuchen32.github.io/posts/how-to-repair-file-system-provided-from-kubernetes-ceph-persistent-volume/</link><guid>https://chienfuchen32.github.io/posts/how-to-repair-file-system-provided-from-kubernetes-ceph-persistent-volume/</guid><pubDate>Sat, 06 May 2023 09:29:38 +0800</pubDate><description><![CDATA[<h1 id="how-to-repair-file-system-provided-from-kubernetes-ceph-persistent-volume">How to repair file system provided from Kubernetes ceph persistent volume</h1>
 <p>某日由於底層VM出現硬體故障，整座自建的Kubernetes接受影響，
 部署於該環境的應用MySQL無法掛載pv，從pod出現的錯誤訊息如下:</p>
