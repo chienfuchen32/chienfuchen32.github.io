@@ -13,7 +13,7 @@ tags: ["Kubernetes","Performance Test","Distributed System","High Availability",
 * Load Balancer. sku: Standard
 * Azure Application Gateway. Tier: WAF V2 (auto scale instance 1-3)
 * Azure PostgreSQL Flexible Server. version: 14.8 sku: 1 * D2ds_v4, 2vCores, 8GiB RAM, 128GiB 500 IOPS Disk)
-* Azure Cache for Redis. sku: 1 * Starndard C3 (6GB Cache Size)
+* Azure Cache for Redis. sku: 1 * Premium P1 (6GB Cache Size)
 * Azure Managed Cassandra. version: 4 sku: 9 * D8s_V5 (8 vCPUs, 32GB RAM, 2 * P30 1024GiB, 5000 IOPS, 200 MB/sec Disk)
 * Azure Virtual Machine Scale Sets. detail were shown as below
 ```bash
