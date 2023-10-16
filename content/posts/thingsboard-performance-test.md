@@ -75,6 +75,7 @@ aks-tbtranspool-11729786-vmss00000a   Ready    agent   21h     v1.26.3   agentpo
 aks-tbtranspool-11729786-vmss00000b   Ready    agent   21h     v1.26.3   agentpool=tbtranspool,beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=Standard_D4s_v4,beta.kubernetes.io/os=linux,failure-domain.beta.kubernetes.io/region=southeastasia,failure-domain.beta.kubernetes.io/zone=0,kubernetes.azure.com/agentpool=tbtranspool,kubernetes.azure.com/cluster=rg-stg-mc-aks-sea,kubernetes.azure.com/consolidated-additional-properties=2b8ca7ed-47ad-11ee-a156-6e02b5896633,kubernetes.azure.com/kubelet-identity-client-id=d455bec7-63d6-4ddb-a2cf-27aff47a1894,kubernetes.azure.com/mode=user,kubernetes.azure.com/node-image-version=AKSUbuntu-2204gen2containerd-202308.10.0,kubernetes.azure.com/nodepool-type=VirtualMachineScaleSets,kubernetes.azure.com/os-sku=Ubuntu,kubernetes.azure.com/role=agent,kubernetes.azure.com/storageprofile=managed,kubernetes.azure.com/storagetier=Premium_LRS,kubernetes.io/arch=amd64,kubernetes.io/hostname=aks-tbtranspool-11729786-vmss00000b,kubernetes.io/os=linux,kubernetes.io/role=agent,node-role.kubernetes.io/agent=,node.kubernetes.io/instance-type=Standard_D4s_v4,storageprofile=managed,storagetier=Premium_LRS,topology.disk.csi.azure.com/zone=,topology.kubernetes.io/region=southeastasia,topology.kubernetes.io/zone=0
 ```
 * Deployment example
+[Thingsboard Helm Chart](https://github.com/chienfuchen32/tb-helm-chart)
 * Pods in Kubernetes
 ```bash
 kubectl get pod -n thingsboard
