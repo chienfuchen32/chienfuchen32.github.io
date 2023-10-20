@@ -6,14 +6,31 @@
 </ul>
 <h2 id="cloud-infrastructure-environment">Cloud Infrastructure Environment</h2>
 <ul>
-<li>Azure Kubernetes v1.26.3. Tier: Standard</li>
-<li>Load Balancer. sku: Standard</li>
-<li>Azure Application Gateway. Tier: WAF V2 (auto scale instance 1-3)</li>
-<li>Azure PostgreSQL Flexible Server. version: 14.8 sku: 1 * D2ds_v4, 2vCores, 8GiB RAM, 128GiB 500 IOPS Disk)</li>
-<li>Azure Cache for Redis. sku: 1 * Premium P1 (6GB Cache Size)</li>
-<li>Azure Managed Cassandra. version: 4 sku: 9 * D8s_V5 (8 vCPUs, 32GB RAM, 2 * P30 1024GiB, 5000 IOPS, 200 MB/sec Disk)</li>
-<li>Azure Virtual Machine Scale Sets. detail were shown as below
-<a href="https://github.com/chienfuchen32/terraform-azure">Terraform Azure IaC</a></li>
+<li>
+<p>Azure Kubernetes v1.26.3. Tier: Standard</p>
+</li>
+<li>
+<p>Load Balancer. sku: Standard</p>
+</li>
+<li>
+<p>Azure Application Gateway. Tier: WAF V2 (auto scale instance 1-3)</p>
+</li>
+<li>
+<p>Azure PostgreSQL Flexible Server. version: 14.8 sku: 1 * D2ds_v4, 2vCores, 8GiB RAM, 128GiB 500 IOPS Disk)</p>
+</li>
+<li>
+<p>Azure Cache for Redis. sku: 1 * Premium P1 (6GB Cache Size)</p>
+</li>
+<li>
+<p>Azure Managed Cassandra. version: 4 sku: 9 * D8s_V5 (8 vCPUs, 32GB RAM, 2 * P30 1024GiB, 5000 IOPS, 200 MB/sec Disk)</p>
+</li>
+<li>
+<p>Azure Virtual Machine Scale Sets. detail were shown as below</p>
+</li>
+<li>
+<p>Deployment example
+<a href="https://github.com/chienfuchen32/terraform-azure">Terraform Azure IaC</a></p>
+</li>
 </ul>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ kubectl get node --show-labels=true
 </span></span><span style="display:flex;"><span>NAME                                  STATUS   ROLES   AGE     VERSION   LABELS
