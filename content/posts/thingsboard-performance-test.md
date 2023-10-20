@@ -16,6 +16,8 @@ tags: ["Kubernetes","Performance Test","Distributed System","High Availability",
 * Azure Cache for Redis. sku: 1 * Premium P1 (6GB Cache Size)
 * Azure Managed Cassandra. version: 4 sku: 9 * D8s_V5 (8 vCPUs, 32GB RAM, 2 * P30 1024GiB, 5000 IOPS, 200 MB/sec Disk)
 * Azure Virtual Machine Scale Sets. detail were shown as below
+
+* Deployment example
 [Terraform Azure IaC](https://github.com/chienfuchen32/terraform-azure)
 ```bash
 $ kubectl get node --show-labels=true
