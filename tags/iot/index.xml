@@ -169,6 +169,7 @@
 </span></span><span style="display:flex;"><span>zookeeper-2                         1/1     Running   0          22h
 </span></span></code></pre></div><ul>
 <li>Device Simulater Scenario: 45000 gateway, each gateway prepared 2 end device. Every device generate radomly distributed value for 3 different telemetry key <code>pulseCounter</code>, <code>leakage</code>, <code>batteryLevel</code> per second. Here it comes with <a href="https://pypi.org/project/paho-mqtt/">paho-mqtt</a> to implement massive clients based on event loop async payload publish to Broker. Expectedly thoughput would be (45000 + 90000 devices) * 3 telemetry / second = 405000 data point per second.</li>
+<li><a href="https://github.com/chienfuchen32/thingsboard-flow/blob/main/perf_async.py">perf example</a>, <a href="https://github.com/chienfuchen32/thingsboard-flow/blob/main/k8s/perf_async_statefulset.yaml">deploy statefulset to K8S</a></li>
 </ul>
 <h2 id="monitoring">Monitoring</h2>
 <h3 id="kafka">Kafka</h3>
