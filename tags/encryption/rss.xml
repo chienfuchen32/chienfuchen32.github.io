@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?><rss version="2.0" xml:lang="en-us" xmlns:atom="http://www.w3.org/2005/Atom"><channel><language>en-us</language><lastBuildDate>Thu, 05 Oct 2023 21:18:19 +0800</lastBuildDate><link>https://chienfuchen32.github.io/tags/encryption/</link><atom:link href="https://chienfuchen32.github.io/tags/encryption/rss.xml" hreflang="en-us" rel="self" type="application/rss+xml"/><atom:link href="https://chienfuchen32.github.io/tags/encryption/" hreflang="en-us" rel="alternate" type="text/html"/><atom:link href="https://chienfuchen32.github.io/tags/encryption/rss.xml" hreflang="en-us" rel="alternate" type="application/rss+xml"/><title>Encryption · Tags · Jeff&rsquo;s note</title><item><description><![CDATA[<h2 id=key-component>Key component</h2><ul><li><code>tang server</code> is responsible for helping dracut to decrypt the target disk. It won&rsquo;t store any client key.</li><li><code>encrypted server</code> is required to use <code>clevis</code>, <code>dracut</code>. It provide a easier way that integrate with tang server to decrypt LUKS disk.</li></ul><h2 id=network-topology>Network topology</h2><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-txt data-lang=txt><span style=display:flex><span>  |-------------------------|                      |------------|
+</span></span><span style=display:flex><span>  |LUKS encrypted server    |-- disk decryption --&gt;|tang server |
+</span></span><span style=display:flex><span>  |(clevis, dracut) [env]   |&lt;----- response ------|[tang]      |
+</span></span><span style=display:flex><span>  |-------------------------|                      |____________|</span></span></code></pre></div><h2 id=tang-server>Tang server</h2><ul><li>software installation via apt on x86x64 Ubuntu 20.04</li></ul><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>adm@tang:~$ sudo apt-get install tang -y
+</span></span><span style=display:flex><span><span style=color:green>## check version</span>
+</span></span><span style=display:flex><span>adm@tang:~$ apt list --installed | grep tang
+</span></span><span style=display:flex><span>tang/focal,now 7-1build1 amd64 [installed]
+</span></span><span style=display:flex><span><span style=color:green>## Enable the tangd service</span>
+</span></span><span style=display:flex><span>adm@tang:~$ sudo systemctl enable tangd.socket</span></span></code></pre></div><ul><li>Create an override file with 7500 to prevent port conflict</li></ul><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>adm@tang:~$ sudo systemctl edit tangd.socket</span></span></code></pre></div><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:green># tangd.socket</span>
+</span></span><span style=display:flex><span>[Socket]
+</span></span><span style=display:flex><span>ListenStream=
+</span></span><span style=display:flex><span>ListenStream=7500 </span></span></code></pre></div><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>adm@tang:~$ sudo systemctl daemon-reload
+</span></span><span style=display:flex><span><span style=color:green>## Check that your configuration is working:</span>
+</span></span><span style=display:flex><span>adm@tang:~$ sudo systemctl show tangd.socket -p Listen
+</span></span><span style=display:flex><span>Listen=[::]:7500 (Stream)
+</span></span><span style=display:flex><span><span style=color:green>## Start the tangd service</span>
+</span></span><span style=display:flex><span>adm@tang:~$ sudo systemctl restart tangd.socket
+</span></span><span style=display:flex><span>adm@tang:~$ sudo systemctl status tangd.socket
+</span></span><span style=display:flex><span>● tangd.socket - Tang Server socket
+</span></span><span style=display:flex><span>     Loaded: loaded (/lib/systemd/system/tangd.socket; enabled; vendor preset: enabled)
+</span></span><span style=display:flex><span>    Drop-In: /etc/systemd/system/tangd.socket.d
+</span></span><span style=display:flex><span>             └─override.conf
+</span></span><span style=display:flex><span>     Active: active (listening) since Mon 2022-03-14 00:54:03 UTC; 1h 25min ago
+</span></span><span style=display:flex><span>   Triggers: ● tangd@0.service
+</span></span><span style=display:flex><span>     Listen: [::]:7500 (Stream)
+</span></span><span style=display:flex><span>   Accepted: 0; Connected: 0;
+</span></span><span style=display:flex><span>      Tasks: 0 (limit: 984)
+</span></span><span style=display:flex><span>     Memory: 44.0K
+</span></span><span style=display:flex><span>     CGroup: /system.slice/tangd.socket
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Mar 14 00:54:03 d systemd[1]: Listening on Tang Server socket.</span></span></code></pre></div><h2 id=encrypted-server-try-clevis-luks-to-bind-with-tang>encrypted server: try clevis, luks to bind with tang</h2><p>Assume that tang server is now running on <code>192.168.100.10:7500</code>, we need to run <code>clevis</code> to bind local encrypted disk (<code>/dev/md0</code> in this case) with tang.</p><ul><li>software installation via apt on x86x64 Ubuntu 20.04</li></ul><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>adm@enc:~$ sudo apt-get install clevis clevis-luks clevis-dracut -y
+</span></span><span style=display:flex><span><span style=color:green>## check version</span>
+</span></span><span style=display:flex><span>adm@enc:~$ apt list --installed | grep clevis
+</span></span><span style=display:flex><span>clevis-dracut/focal-updates,now 12-1ubuntu2.3 all [installed]
+</span></span><span style=display:flex><span>clevis-luks/focal-updates,now 12-1ubuntu2.3 all [installed]
+</span></span><span style=display:flex><span>clevis-systemd/focal-updates,now 12-1ubuntu2.3 amd64 [installed,automatic]
+</span></span><span style=display:flex><span>clevis/focal-updates,now 12-1ubuntu2.3 amd64 [installed]
+</span></span><span style=display:flex><span>adm@enc:~$ apt list --installed | grep dracut
+</span></span><span style=display:flex><span>dracut-core/focal,now 048+80-2 amd64 [installed,automatic]
+</span></span><span style=display:flex><span>dracut-network/focal,now 048+80-2 all [installed]</span></span></code></pre></div><ul><li>check network configuration and check if tang server available</li></ul><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>adm@enc:~$ip a
+</span></span><span style=display:flex><span>1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+</span></span><span style=display:flex><span>    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+</span></span><span style=display:flex><span>    inet 127.0.0.1/8 scope host lo
+</span></span><span style=display:flex><span>       valid_lft forever preferred_lft forever
+</span></span><span style=display:flex><span>    inet6 ::1/128 scope host
+</span></span><span style=display:flex><span>       valid_lft forever preferred_lft forever
+</span></span><span style=display:flex><span>2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc mq state UP group default qlen 1000
+</span></span><span style=display:flex><span>    link/ether c4:00:ad:94:d8:76 brd ff:ff:ff:ff:ff:ff
+</span></span><span style=display:flex><span>    inet 192.168.100.61/24 brd 192.168.100.255 scope global enp1s0
+</span></span><span style=display:flex><span>       valid_lft forever preferred_lft forever
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>adm@enc:~$ curl -sfg http://192.168.100.10:7500/adv -o adv.jws</span></span></code></pre></div><ul><li>check encrypted disk, partition</li></ul><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>adm@enc:~$ sudo lsblk
+</span></span><span style=display:flex><span>NAME              MAJ:MIN RM   SIZE RO TYPE  MOUNTPOINT
+</span></span><span style=display:flex><span>loop0               7:0    0    55M  1 loop  /snap/core18/1880
+</span></span><span style=display:flex><span>loop1               7:1    0  55.5M  1 loop  /snap/core18/2344
+</span></span><span style=display:flex><span>loop2               7:2    0  67.9M  1 loop  /snap/lxd/22526
+</span></span><span style=display:flex><span>loop3               7:3    0  67.8M  1 loop  /snap/lxd/22753
+</span></span><span style=display:flex><span>loop4               7:4    0  61.9M  1 loop  /snap/core20/1376
+</span></span><span style=display:flex><span>loop5               7:5    0  43.6M  1 loop  /snap/snapd/15177
+</span></span><span style=display:flex><span>sda                 8:0    0 953.9G  0 disk
+</span></span><span style=display:flex><span>├─sda1              8:1    0   512M  0 part  /boot/efi
+</span></span><span style=display:flex><span>├─sda2              8:2    0     1G  0 part  /boot
+</span></span><span style=display:flex><span>├─sda3              8:3    0 945.9G  0 part
+</span></span><span style=display:flex><span>│ └─md0             9:0    0 945.8G  0 raid1
+</span></span><span style=display:flex><span>│   └─dm_crypt-1  253:0    0 945.7G  0 crypt
+</span></span><span style=display:flex><span>│     └─vg0-lv--0 253:1    0 945.7G  0 lvm   /
+</span></span><span style=display:flex><span>└─sda4              8:4    0   6.5G  0 part
+</span></span><span style=display:flex><span>sdb                 8:16   0 953.9G  0 disk
+</span></span><span style=display:flex><span>├─sdb1              8:17   0     8G  0 part  [SWAP]
+</span></span><span style=display:flex><span>└─sdb2              8:18   0 945.9G  0 part
+</span></span><span style=display:flex><span>  └─md0             9:0    0 945.8G  0 raid1
+</span></span><span style=display:flex><span>    └─dm_crypt-1  253:0    0 945.7G  0 crypt
+</span></span><span style=display:flex><span>      └─vg0-lv--0 253:1    0 945.7G  0 lvm   /
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:green># check LUKS on encrpyt partition, total 8 keyslots</span>
+</span></span><span style=display:flex><span>$ sudo cryptsetup luksDump /dev/md0
+</span></span><span style=display:flex><span>LUKS header information
+</span></span><span style=display:flex><span>Version:        2
+</span></span><span style=display:flex><span>Epoch:          5
+</span></span><span style=display:flex><span>Metadata area:  16384 [bytes]
+</span></span><span style=display:flex><span>Keyslots area:  16744448 [bytes]
+</span></span><span style=display:flex><span>UUID:           b3abd9e0-b3be-4dab-9928-e3f29c749b93
+</span></span><span style=display:flex><span>Label:          (no label)
+</span></span><span style=display:flex><span>Subsystem:      (no subsystem)
+</span></span><span style=display:flex><span>Flags:          (no flags)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Data segments:
+</span></span><span style=display:flex><span>  0: crypt
+</span></span><span style=display:flex><span>        offset: 16777216 [bytes]
+</span></span><span style=display:flex><span>        length: (whole device)
+</span></span><span style=display:flex><span>        cipher: aes-xts-plain64
+</span></span><span style=display:flex><span>        sector: 512 [bytes]
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Keyslots:
+</span></span><span style=display:flex><span>  0: luks2
+</span></span><span style=display:flex><span>        Key:        512 bits
+</span></span><span style=display:flex><span>        Priority:   normal
+</span></span><span style=display:flex><span>        Cipher:     aes-xts-plain64
+</span></span><span style=display:flex><span>        Cipher key: 512 bits
+</span></span><span style=display:flex><span>        PBKDF:      argon2i
+</span></span><span style=display:flex><span>        Time cost:  5
+</span></span><span style=display:flex><span>        Memory:     1048576
+</span></span><span style=display:flex><span>        Threads:    4
+</span></span><span style=display:flex><span>        Salt:       44 01 7e f7 be 90 fa d9 fe 24 8f b7 95 6e 28 91
+</span></span><span style=display:flex><span>                    53 7c 47 5d 6f 0a cf 34 18 c4 ee 13 d6 91 28 e5
+</span></span><span style=display:flex><span>        AF stripes: 4000
+</span></span><span style=display:flex><span>        AF hash:    sha256
+</span></span><span style=display:flex><span>        Area offset:32768 [bytes]
+</span></span><span style=display:flex><span>        Area length:258048 [bytes]
+</span></span><span style=display:flex><span>        Digest ID:  
+</span></span><span style=display:flex><span>Tokens:
+</span></span><span style=display:flex><span>  0: clevis
+</span></span><span style=display:flex><span>        Keyslot:  1
+</span></span><span style=display:flex><span>Digests:
+</span></span><span style=display:flex><span>  0: pbkdf2
+</span></span><span style=display:flex><span>        Hash:       sha256
+</span></span><span style=display:flex><span>        Iterations: 100054
+</span></span><span style=display:flex><span>        Salt:       8b 7d 45 cf 2b 25 07 bd 7d 48 47 04 1e 70 d0 41
+</span></span><span style=display:flex><span>                    46 7c fa 1f ec ed 12 2a c5 36 fc 24 56 b8 6c 7e
+</span></span><span style=display:flex><span>        Digest:     06 89 5e 90 07 1c 83 eb 54 0a 14 d5 ad f2 f6 50
+</span></span><span style=display:flex><span>                    5f 13 00 58 62 ee 11 62 db 7c e0 1a 45 c5 fa 09
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>adm@enc:~$ sudo clevis luks bind -d /dev/md0 tang <span style=color:#a31515>&#39;{&#34;url&#34;:&#34;http://192.168.100.10:7500&#34;}&#39;</span>
+</span></span><span style=display:flex><span>The advertisement contains the following signing keys:
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>ADIMDQW1mFAAoGFlQJIG9SioKDW
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Do you wish to trust these keys? [ynYN] y
+</span></span><span style=display:flex><span>Enter existing LUKS password:
+</span></span><span style=display:flex><span>...
+</span></span><span style=display:flex><span><span style=color:green># check current state</span>
+</span></span><span style=display:flex><span>adm@enc:~$ sudo clevis luks list -d /dev/md0
+</span></span><span style=display:flex><span>1: tang <span style=color:#a31515>&#39;{&#34;url&#34;:&#34;http://192.168.100.100:7500&#34;}&#39;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:green># try dracut</span>
+</span></span><span style=display:flex><span>adm@enc:~$ dracut -fv --regenerate-all --kernel-cmdline <span style=color:#a31515>&#34; ip=192.168.100.61:192.168.100.0/24::255.255.255.0:enc:eth0:off &#34;</span> --kernel-cmdline <span style=color:#a31515>&#34; rd.net.timeout.carrier=3153600 &#34;</span></span></span></code></pre></div><h2 id=generate-a-initramfs-for-bootloader>generate a initramfs for bootloader</h2><p>Make grub load our image that contains clevis luks disk encryption script. The image is built by <code>dracut</code>. Our purpose is no matter when the <code>grub.cfg</code> will be updated, the main menuentry should be our dracut environment (<code>linux</code>, <code>initrd</code>)</p><ul><li>check grub version</li></ul><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>adm@enc:~$ sudo apt list --installed | grep grub
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>grub-common/now 2.04-1ubuntu26.2 amd64 [installed,upgradable to: 2.04-1ubuntu26.13]
+</span></span><span style=display:flex><span>grub-efi-amd64-bin/focal-updates,focal-security,now 2.04-1ubuntu44.2 amd64 [installed,automatic]
+</span></span><span style=display:flex><span>grub-efi-amd64-signed/focal-updates,focal-security,now 1.167.2+2.04-1ubuntu44.2 amd64 [installed]
+</span></span><span style=display:flex><span>grub-efi-amd64/focal-updates,focal-security,now 2.04-1ubuntu44.2 amd64 [installed]
+</span></span><span style=display:flex><span>grub2-common/now 2.04-1ubuntu26.2 amd64 [installed,upgradable to: 2.04-1ubuntu26.13]</span></span></code></pre></div><ol><li>You can try to ping gateway IP and tang server&rsquo;s IP, if gateway IP is not available, don&rsquo;t fill in that field.</li></ol><pre tabindex=0><code>adm@enc:~$ ping 192.168.100.10
+PING 192.168.100.10 (192.168.100.100) 56(84) bytes of data.
+64 bytes from 192.168.100.10: icmp_seq=1 ttl=64 time=10.9 ms
+64 bytes from 192.168.100.10: icmp_seq=2 ttl=64 time=1.00 ms
+...</code></pre><p>To enumerate all possible environment to generate new grub.cfg, please check our modified <code>10_linux file</code>
+Add new dracut script with customized argument for your environment to grub folder, please check detail in Misc <code>dracut cmdline argument</code> part and edit files <code>/etc/dracut.conf.d/</code> if needed.</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>adm@enc:~$ sudo vi dracut-config/etc-dracut.conf.d/12-kernel-cmdline.conf</span></span></code></pre></div><pre tabindex=0><code class=language-conf data-lang=conf>kernel_cmdline+=&#34; ip=192.168.100.61:192.168.100.0/24::255.255.255.0:enc:eth0:off &#34;
+kernel_cmdline+=&#34;rd.net.timeout.carrier=3153600 &#34;</code></pre><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span><span style=color:green># copy to grub config path</span>
+</span></span><span style=display:flex><span>adm@enc:~$ sudo cp dracut-config/etc-dracut.conf.d/12-kernel-cmdline.conf /etc/dracut.conf.d/12-kernel-cmdline.conf
+</span></span><span style=display:flex><span><span style=color:green># backup first</span>
+</span></span><span style=display:flex><span>adm@enc:~$ sudo cp /etc/grub.d/10_linux /etc/grub.d/.10_linux.bk
+</span></span><span style=display:flex><span><span style=color:green># add our include running dracut script and set initramfs as default menuentry</span>
+</span></span><span style=display:flex><span>adm@enc:~$ sudo cp etc-grub.d/10_linux /etc/grub.d/10_linux
+</span></span><span style=display:flex><span><span style=color:green># update grub.cfg manually</span>
+</span></span><span style=display:flex><span>adm@enc:~$ sudo update-grub
+</span></span><span style=display:flex><span><span style=color:green># you might see lot of log including dracut, correct them if there&#39;s anything wrong.</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Sourcing file <span style=color:#a31515>`</span>/etc/default/grub<span style=color:#a31515>&#39;
+</span></span></span><span style=display:flex><span><span style=color:#a31515>Sourcing file `/etc/default/grub.d/init-select.cfg&#39;</span>
+</span></span><span style=display:flex><span>Generating grub configuration file ...
+</span></span><span style=display:flex><span>dracut: Executing: /usr/bin/dracut --kver=5.4.0-104-generic -fv --kernel-cmdline <span style=color:#a31515>&#34; ip=192.168.100.61:192.168.100.0/24::255.255.255.0:enc:eth0:off &#34;</span>
+</span></span><span style=display:flex><span>dracut: dracut module <span style=color:#a31515>&#39;bootchart&#39;</span> will not be installed, because command <span style=color:#a31515>&#39;/sbin/bootchartd&#39;</span> could not be found!
+</span></span><span style=display:flex><span>dracut: dracut module <span style=color:#a31515>&#39;clevis-pin-tpm2&#39;</span> will not be installed, because command <span style=color:#a31515>&#39;clevis-decrypt-tpm2&#39;</span> could not be found!
+</span></span><span style=display:flex><span>dracut: dracut module <span style=color:#a31515>&#39;clevis-pin-tpm2&#39;</span> will not be installed, because command <span style=color:#a31515>&#39;tpm2_createprimary&#39;</span> could not be found!
+</span></span><span style=display:flex><span>dracut: dracut module <span style=color:#a31515>&#39;clevis-pin-tpm2&#39;</span> will not be installed, because command <span style=color:#a31515>&#39;tpm2_unseal&#39;</span> could not be found!
+</span></span><span style=display:flex><span>dracut: dracut module <span style=color:#a31515>&#39;clevis-pin-tpm2&#39;</span> will not be installed, because command <span style=color:#a31515>&#39;tpm2_load&#39;</span> could not be found!
+</span></span><span style=display:flex><span>dracut: dracut module <span style=color:#a31515>&#39;cifs&#39;</span> will not be installed, because command <span style=color:#a31515>&#39;mount.cifs&#39;</span> could not be found!
+</span></span><span style=display:flex><span>dracut: dracut module <span style=color:#a31515>&#39;biosdevname&#39;</span> will not be installed, because command <span style=color:#a31515>&#39;biosdevname&#39;</span> could not be found!
+</span></span><span style=display:flex><span>dracut: dracut module <span style=color:#a31515>&#39;clevis-pin-tpm2&#39;</span> will not be installed, because command <span style=color:#a31515>&#39;clevis-decrypt-tpm2&#39;</span> could not be found!
+</span></span><span style=display:flex><span>dracut: dracut module <span style=color:#a31515>&#39;clevis-pin-tpm2&#39;</span> will not be installed, because command <span style=color:#a31515>&#39;tpm2_createprimary&#39;</span> could not be found!
+</span></span><span style=display:flex><span>dracut: dracut module <span style=color:#a31515>&#39;clevis-pin-tpm2&#39;</span> will not be installed, because command <span style=color:#a31515>&#39;tpm2_unseal&#39;</span> could not be found!
+</span></span><span style=display:flex><span>dracut: dracut module <span style=color:#a31515>&#39;clevis-pin-tpm2&#39;</span> will not be installed, because command <span style=color:#a31515>&#39;tpm2_load&#39;</span> could not be found!
+</span></span><span style=display:flex><span>dracut: dracut module <span style=color:#a31515>&#39;cifs&#39;</span> will not be installed, because command <span style=color:#a31515>&#39;mount.cifs&#39;</span> could not be found!
+</span></span><span style=display:flex><span>dracut: *** Including module: bash ***
+</span></span><span style=display:flex><span>dracut: *** Including module: dash ***
+</span></span><span style=display:flex><span>...
+</span></span><span style=display:flex><span>dracut: *** Creating initramfs image file <span>&#39;</span>/boot/initramfs-5.4.0-42-generic.img<span style=color:#a31515>&#34; done ***
+</span></span></span><span style=display:flex><span><span style=color:#a31515>Found linux image: /boot/vmlinuz-5.4.0-104-generic
+</span></span></span><span style=display:flex><span><span style=color:#a31515>Found initrd image: /boot/initramfs-5.4.0-104-generic.img
+</span></span></span><span style=display:flex><span><span style=color:#a31515>Found initrd image: /boot/initramfs-5.4.0-104-generic.img
+</span></span></span><span style=display:flex><span><span style=color:#a31515>Found initrd image: /boot/initrd.img-5.4.0-104-generic
+</span></span></span><span style=display:flex><span><span style=color:#a31515>Found initrd image: /boot/initrd.img-5.4.0-104-generic
+</span></span></span><span style=display:flex><span><span style=color:#a31515>Found linux image: /boot/vmlinuz-5.4.0-42-generic
+</span></span></span><span style=display:flex><span><span style=color:#a31515>Found initrd image: /boot/initramfs-5.4.0-42-generic.img
+</span></span></span><span style=display:flex><span><span style=color:#a31515>Found initrd image: /boot/initramfs-5.4.0-42-generic.img
+</span></span></span><span style=display:flex><span><span style=color:#a31515>Found initrd image: /boot/initrd.img-5.4.0-42-generic
+</span></span></span><span style=display:flex><span><span style=color:#a31515>Found initrd image: /boot/initrd.img-5.4.0-42-generic
+</span></span></span><span style=display:flex><span><span style=color:#a31515>Adding boot menu entry for UEFI Firmware Settings
+</span></span></span><span style=display:flex><span><span style=color:#a31515>done</span></span></span></code></pre></div><ul><li>check if initramfs created by dracut</li></ul><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>adm@enc:~$ ls -lh /boot
+</span></span><span style=display:flex><span>total 250M
+</span></span><span style=display:flex><span>-rw-r--r-- 1 root root 233K Feb  3 18:16 config-5.4.0-100-generic
+</span></span><span style=display:flex><span>-rw-r--r-- 1 root root 233K Mar  2 17:10 config-5.4.0-104-generic
+</span></span><span style=display:flex><span>drwxr-xr-x 3 root root 4.0K Jan  1  1970 efi
+</span></span><span style=display:flex><span>drwxr-xr-x 4 root root 4.0K Mar 12 06:33 grub
+</span></span><span style=display:flex><span>-rw------- 1 root root  24M Mar 11 06:29 initramfs-5.4.0-100-generic.img
+</span></span><span style=display:flex><span>-rw------- 1 root root  24M Mar 11 06:29 initramfs-5.4.0-42-generic.img
+</span></span><span style=display:flex><span>lrwxrwxrwx 1 root root   28 Mar 11 07:55 initrd.img -&gt; initrd.img-5.4.0-104-generic
+</span></span><span style=display:flex><span>-rw-r--r-- 1 root root  84M Feb 26 06:34 initrd.img-5.4.0-100-generic
+</span></span><span style=display:flex><span>-rw-r--r-- 1 root root  84M Mar 11 07:56 initrd.img-5.4.0-104-generic
+</span></span><span style=display:flex><span>lrwxrwxrwx 1 root root   28 Mar 11 07:55 initrd.img.old -&gt; initrd.img-5.4.0-100-generic
+</span></span><span style=display:flex><span>drwx------ 2 root root  16K Feb 25 06:13 lost+found
+</span></span><span style=display:flex><span>-rw------- 1 root root 4.6M Feb  3 18:16 System.map-5.4.0-100-generic
+</span></span><span style=display:flex><span>-rw------- 1 root root 4.6M Mar  2 17:10 System.map-5.4.0-104-generic
+</span></span><span style=display:flex><span>lrwxrwxrwx 1 root root   25 Mar 11 07:55 vmlinuz -&gt; vmlinuz-5.4.0-104-generic
+</span></span><span style=display:flex><span>-rw------- 1 root root  14M Feb  4 17:04 vmlinuz-5.4.0-100-generic
+</span></span><span style=display:flex><span>-rw------- 1 root root  14M Mar  2 18:37 vmlinuz-5.4.0-104-generic
+</span></span><span style=display:flex><span>lrwxrwxrwx 1 root root   25 Mar 11 07:55 vmlinuz.old -&gt; vmlinuz-5.4.0-100-generic</span></span></code></pre></div><ul><li>check if grub config (<code>/boot/grub/grub.cfg</code>) changed and the first one should be direct to our image</li></ul><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=display:flex><span>menuentry &#39;Ubuntu&#39; --class ubuntu --class gnu-linux --class gnu --class os $menuentry_id_option &#39;gnulinux-simple-eec358a5-d009-4f70-9210-424330e9adb4&#39; {
+</span></span><span style=display:flex><span>        recordfail
+</span></span><span style=display:flex><span>        load_video
+</span></span><span style=display:flex><span>        gfxmode $linux_gfx_mode
+</span></span><span style=display:flex><span>        insmod gzio
+</span></span><span style=display:flex><span>        if [ x$grub_platform = xxen ]; then insmod xzio; insmod lzopio; fi
+</span></span><span style=display:flex><span>        insmod part_gpt
+</span></span><span style=display:flex><span>        insmod ext2
+</span></span><span style=display:flex><span>        set root=&#39;hd0,gpt2&#39;
+</span></span><span style=display:flex><span>        if [ x$feature_platform_search_hint = xy ]; then
+</span></span><span style=display:flex><span>          search --no-floppy --fs-uuid --set=root --hint-bios=hd0,gpt2 --hint-efi=hd0,gpt2 --hint-baremetal=ahci0,gpt2  a5963b85-5235-4b31-9776-5f6251c206f3
+</span></span><span style=display:flex><span>        else
+</span></span><span style=display:flex><span>          search --no-floppy --fs-uuid --set=root a5963b85-5235-4b31-9776-5f6251c206f3
+</span></span><span style=display:flex><span>        fi
+</span></span><span style=display:flex><span>        linux   /vmlinuz-5.4.0-104-generic root=/dev/mapper/ubuntu--vg-ubuntu--lv ro
+</span></span><span style=display:flex><span>        initrd  /initramfs-5.4.0-104-generic.img
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>...</span></span></code></pre></div><ul><li>you may try clevis-luks boot with disk decryption flow!</li></ul><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>adm@enc:~$ sudo reboot</span></span></code></pre></div><h3 id=enhancement-in-the-future>Enhancement in the future</h3><ul><li>Shamir&rsquo;s Secret Sharing (SSS) algorithm with clevis multiple constriant: tpm, tangd, &mldr; etc.</li><li>add tpm to protect tangd key on site controller</li><li>make dracut image name to be fixed</li></ul><h3 id=misc>Misc</h3><ul><li><p><code>Tangd</code> tech, McCallum-Relyea Exchange: client(clevis) need server(tang) to decrypt data, there&rsquo;s no client data stored in server.</p></li><li><p>dracut cmdline argument</p></li></ul><pre tabindex=0><code>   ip=&lt;client-IP&gt;:[&lt;peer&gt;]:&lt;gateway-IP&gt;:&lt;netmask&gt;:&lt;client_hostname&gt;:&lt;interface&gt;:{none|off|dhcp|on|any|dhcp6|auto6|ibft}[:[&lt;mtu&gt;][:&lt;macaddr&gt;]]
+       explicit network configuration. If you want do define a IPv6
+       address, put it in brackets (e.g. [2001:DB8::1]). This
+       parameter can be specified multiple times.  &lt;peer&gt; is
+       optional and is the address of the remote endpoint for
+       pointopoint interfaces and it may be followed by a slash and
+       a decimal number, encoding the network prefix length.
+
+       &lt;macaddr&gt;
+           optionally set &lt;macaddr&gt; on the &lt;interface&gt;. This cannot
+           be used in conjunction with the ifname argument for the
+           same &lt;interface&gt;.
+Ref: https://man7.org/linux/man-pages/man7/dracut.cmdline.7.html</code></pre><h3 id=bootloader-alternative>bootloader alternative</h3><ul><li><p>you can still use grub shell, if the <code>/boot/grub/grub.cfg</code> is broken.</p></li><li><p>bootable Ubuntu USB stick</p></li></ul><h4 id=ref>Ref</h4><ul><li>luks, clevis, tang</li></ul><pre tabindex=0><code>https://mdtsai.medium.com/%E8%A7%A3%E9%99%A4-linux-%E5%8A%A0%E5%AF%86%E7%A3%81%E5%8D%80-5b8e597e4c37
+https://www.osslab.com.tw/research-luks/
+https://www.itread01.com/content/1542818777.html
+https://kknews.cc/zh-tw/code/n22kq38.html
+https://www.tecmint.com/file-and-disk-encryption-tools-for-linux/
+https://www.tecmint.com/disk-encryption-in-linux/
+https://help.ubuntu.com/community/Full_Disk_Encryption_Howto_2019
+https://wiki.archlinux.org/title/Data-at-rest_encryption
+https://docs.microsoft.com/zh-tw/azure/virtual-machines/linux/how-to-configure-lvm-raid-on-crypt
+https://linuxsecurity.com/features/top-8-file-and-disk-encryption-tools-for-linux
+https://nakedsecurity.sophos.com/2022/01/14/serious-security-linux-full-disk-encryption-bug-fixed-patch-now/
+https://www.cyberciti.biz/security/howto-linux-hard-disk-encryption-with-luks-cryptsetup-command/
+https://docs.nvidia.com/drive/drive_os_5.1.6.1L/nvvib_docs/index.html#page/DRIVE_OS_Linux_SDK_Development_Guide/Windows%20Systems/security_disk_encryption_lnx.html
+https://www.wibu.com/
+https://wiki.centos.org/zh-tw/HowTos/EncryptedFilesystem
+https://gitlab.com/cryptsetup/cryptsetup/-/wikis/DMCrypt
+https://www.digitalocean.com/community/tutorials/how-to-use-dm-crypt-to-create-an-encrypted-volume-on-an-ubuntu-vps
+https://www.howtoforge.com/ubuntu_dm_crypt_luks
+https://ubuntuqa.com/zh-tw/article/8257.html
+https://www.gushiciku.cn/pl/g4f9/zh-tw
+https://askubuntu.com/questions/996155/how-do-i-automatically-decrypt-an-encrypted-filesystem-on-the-next-reboot
+https://dywang.csie.cyut.edu.tw/dywang/linuxsecurity/node59.html
+https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/security_hardening/configuring-automated-unlocking-of-encrypted-volumes-using-policy-based-decryption_security-hardening
+https://www.youtube.com/watch?v=Dk6ZuydQt9I
+https://www.youtube.com/watch?v=h5H6_oxpFA0
+https://www.admin-magazine.com/Archive/2018/43/Automatic-data-encryption-and-decryption-with-Clevis-and-Tang
+https://www.snia.org/sites/default/files/SDC15_presentations/security/NathanielMcCallum_Network_Bound_Encryption.pdf
+https://www.youtube.com/watch?v=p_M0YEE-esA
+https://www.cs.purdue.edu/homes/hmaji/teaching/Fall%202018/lectures/19.pdf
+https://docs.okd.io/latest/security/network_bound_disk_encryption/nbde-managing-encryption-keys.html
+# systemd, init
+https://hugh712.gitbooks.io/buildroot/content/system-initialization.html
+http://felix-lin.com/linux/init%e6%bc%94%e5%8c%96%e6%ad%b7%e7%a8%8b-%e8%bd%89%e8%b2%bc-%e6%b7%ba%e6%9e%90-linux-%e5%88%9d%e5%a7%8b%e5%8c%96-init-%e7%b3%bb%e7%b5%b1%ef%bc%8c%e7%ac%ac-1-%e9%83%a8%e5%88%86-sysvinit/
+https://linux.die.net/man/5/init
+http://felix-lin.com/linux/init%E6%BC%94%E5%8C%96%E6%AD%B7%E7%A8%8B-%E8%BD%89%E8%B2%BC-%E6%B7%BA%E6%9E%90-linux-%E5%88%9D%E5%A7%8B%E5%8C%96-init-%E7%B3%BB%E7%B5%B1%EF%BC%8C%E7%AC%AC-2-%E9%83%A8%E5%88%86-upstart/
+# grub
+https://hugh712.gitbooks.io/grub/content/configuration-files.html
+https://wiki.ubuntu-tw.org/index.php?title=Grub2</code></pre>]]></description><guid isPermaLink="false">tag:chienfuchen32.github.io,2022-03-17:/posts/luks-tang/</guid><link>https://chienfuchen32.github.io/posts/luks-tang/</link><atom:link href="https://chienfuchen32.github.io/posts/luks-tang/" hreflang="en-us" rel="alternate" type="text/html"/><pubDate>Thu, 17 Mar 2022 10:16:41 +0800</pubDate><title>Disk encryption: LUKS ( Linux Unified Key Setup) with Tang</title></item></channel></rss>

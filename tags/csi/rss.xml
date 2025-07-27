@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?><rss version="2.0" xml:lang="en-us" xmlns:atom="http://www.w3.org/2005/Atom"><channel><language>en-us</language><lastBuildDate>Thu, 05 Oct 2023 21:18:19 +0800</lastBuildDate><link>https://chienfuchen32.github.io/tags/csi/</link><atom:link href="https://chienfuchen32.github.io/tags/csi/rss.xml" hreflang="en-us" rel="self" type="application/rss+xml"/><atom:link href="https://chienfuchen32.github.io/tags/csi/" hreflang="en-us" rel="alternate" type="text/html"/><atom:link href="https://chienfuchen32.github.io/tags/csi/rss.xml" hreflang="en-us" rel="alternate" type="application/rss+xml"/><title>CSI · Tags · Jeff&rsquo;s note</title><item><description><![CDATA[<h1 id=how-to-repair-file-system-provided-from-kubernetes-ceph-persistent-volume>How to repair file system provided from Kubernetes ceph persistent volume</h1><p>某日由於底層VM出現硬體故障，整座自建的Kubernetes接受影響，
+部署於該環境的應用MySQL無法掛載pv，從pod出現的錯誤訊息如下:</p><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>MountVolume.SetUp failed <span style=color:#00f>for</span> volume <span style=color:#a31515>&#34;pvc-78cf22fa-d776-43a4-98d7-d594f02ea018&#34;</span> : mount command failed, status: Failure, reason: failed to mount volume /dev/rbd13 [xfs] to /var/lib/kubelet/plugins/ceph.rook.io/rook-ceph/mounts/pvc-78cf22fa-d776-43a4-98d7-d594f02ea018, error mount failed: exit status 32 Mounting command: systemd-run Mounting arguments: --description=Kubernetes transient mount <span style=color:#00f>for</span> /var/lib/kubelet/plugins/ceph.rook.io/rook-ceph/mounts/pvc-78cf22fa-d776-43a4-98d7-d594f02ea018 --scope -- mount -t xfs -o rw,defaults /dev/rbd13 /var/lib/kubelet/plugins/ceph.rook.io/rook-ceph/mounts/pvc-78cf22fa-d776-43a4-98d7-d594f02ea018 Output: Running scope as unit run-r2594d6c82152421c8891bfa8761e8c05.scope. mount: mount /dev/rbd13 on /var/lib/kubelet/plugins/ceph.rook.io/rook-ceph/mounts/pvc-78cf22fa-d776-43a4-98d7-d594f02ea018 failed: Structure needs cleaning</span></span></code></pre></div><p>處理方式:
+透過ceph tool重新掛載該pv的image，試著使用fsck修復</p><h2 id=詳細處理流程>詳細處理流程:</h2><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>$ kubectl exec -it -n rook-ceph rook-ceph-tools-69f996589-ps4k7 bash
+</span></span><span style=display:flex><span>[root@twtpedev013 /]<span style=color:green># rbd map --pool=replicapool pvc-78cf22fa-d776-43a4-98d7-d594f02ea018</span>
+</span></span><span style=display:flex><span>[root@twtpedev013 /]<span style=color:green># lsblk</span>
+</span></span><span style=display:flex><span>NAME                                                                MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+</span></span><span style=display:flex><span>sda                                                                   8:0    0   16G  0 disk
+</span></span><span style=display:flex><span>|-sda1                                                                8:1    0  731M  0 part
+</span></span><span style=display:flex><span>|-sda2                                                                8:2    0    1K  0 part
+</span></span><span style=display:flex><span><span style=color:#a31515>`</span>-sda5                                                                8:5    0 15.3G  0 part
+</span></span><span style=display:flex><span>  |-ubuntu--vg-root                                                 252:0    0 14.3G  0 lvm  /etc/hosts
+</span></span><span style=display:flex><span>  <span style=color:#a31515>`</span>-ubuntu--vg-swap_1                                               252:1    0  976M  0 lvm
+</span></span><span style=display:flex><span>sdb                                                                   8:16   0 1000G  0 disk
+</span></span><span style=display:flex><span><span style=color:#a31515>`</span>-ceph--4b83cf83--445d--42cc--8eeb--f7febf99fcab-osd--data--ee3fbf0e--4521--46fd--9879--e73048f7a697
+</span></span><span style=display:flex><span>                                                                    252:2    0  999G  0 lvm
+</span></span><span style=display:flex><span>sr0                                                                  11:0    1 1024M  0 rom
+</span></span><span style=display:flex><span>rbd0                                                                251:0    0   10G  0 disk
+</span></span><span style=display:flex><span>[root@twtpedev013 /]<span style=color:green># mkdir test-mysql</span>
+</span></span><span style=display:flex><span>[root@twtpedev013 /]<span style=color:green># mount /dev/rbd0 test-mysql/</span>
+</span></span><span style=display:flex><span>mount: mount /dev/rbd0 on /test-mysql failed: Structure needs cleaning
+</span></span><span style=display:flex><span>[root@twtpedev013 /]<span style=color:green># fsck /dev/rbd0</span>
+</span></span><span style=display:flex><span>fsck from util-linux 2.23.2
+</span></span><span style=display:flex><span>If you wish to check the consistency of an XFS filesystem or
+</span></span><span style=display:flex><span>repair a damaged filesystem, see xfs_repair(8).
+</span></span><span style=display:flex><span>[root@twtpedev013 /]<span style=color:green># xfs_repair -L /dev/rbd0</span>
+</span></span><span style=display:flex><span>Phase 1 - find and verify superblock...
+</span></span><span style=display:flex><span>- reporting progress in intervals of 15 minutes
+</span></span><span style=display:flex><span>Phase 2 - using internal log
+</span></span><span style=display:flex><span>- zero log...
+</span></span><span style=display:flex><span>ALERT: The filesystem has valuable metadata changes in a log which is being
+</span></span><span style=display:flex><span>destroyed because the -L option was used.
+</span></span><span style=display:flex><span>- scan filesystem freespace and inode maps...
+</span></span><span style=display:flex><span>agi unlinked bucket 35 is 8227 in ag 0 (inode=8227)
+</span></span><span style=display:flex><span>sb_ifree 228, counted 227
+</span></span><span style=display:flex><span>sb_fdblocks 2398405, counted 2426486
+</span></span><span style=display:flex><span>- 02:26:05: scanning filesystem freespace - 17 of 17 allocation groups <span style=color:#00f>done</span>
+</span></span><span style=display:flex><span>- found root inode chunk
+</span></span><span style=display:flex><span>Phase 3 - <span style=color:#00f>for</span> each AG...
+</span></span><span style=display:flex><span>- scan and clear agi unlinked lists...
+</span></span><span style=display:flex><span>- 02:26:05: scanning agi unlinked lists - 17 of 17 allocation groups <span style=color:#00f>done</span>
+</span></span><span style=display:flex><span>- process known inodes and perform inode discovery...
+</span></span><span style=display:flex><span>- agno = 0
+</span></span><span style=display:flex><span>- agno = 15
+</span></span><span style=display:flex><span>- agno = 16
+</span></span><span style=display:flex><span>Metadata CRC error detected at xfs_bmbt block 0x2d9ff8/0x1000
+</span></span><span style=display:flex><span>data fork in ino 8226 claims free block 1112
+</span></span><span style=display:flex><span>correcting imap
+</span></span><span style=display:flex><span>Metadata CRC error detected at xfs_bmbt block 0x2d9ff8/0x1000
+</span></span><span style=display:flex><span>btree block 2/48127 is suspect, error -74
+</span></span><span style=display:flex><span>bad magic <span style=color:green># 0 in inode 8227 (data fork) bmbt block 572415</span>
+</span></span><span style=display:flex><span>bad data fork in inode 8227
+</span></span><span style=display:flex><span>cleared inode 8227
+</span></span><span style=display:flex><span>- agno = 1
+</span></span><span style=display:flex><span>- agno = 2
+</span></span><span style=display:flex><span>- agno = 3
+</span></span><span style=display:flex><span>- agno = 4
+</span></span><span style=display:flex><span>- agno = 5
+</span></span><span style=display:flex><span>- agno = 6
+</span></span><span style=display:flex><span>- agno = 7
+</span></span><span style=display:flex><span>- agno = 8
+</span></span><span style=display:flex><span>- agno = 9
+</span></span><span style=display:flex><span>- agno = 10
+</span></span><span style=display:flex><span>- agno = 11
+</span></span><span style=display:flex><span>- agno = 12
+</span></span><span style=display:flex><span>- agno = 13
+</span></span><span style=display:flex><span>- agno = 14
+</span></span><span style=display:flex><span>- 02:26:05: process known inodes and inode discovery - 384 of 384 inodes <span style=color:#00f>done</span>
+</span></span><span style=display:flex><span>- process newly discovered inodes...
+</span></span><span style=display:flex><span>- 02:26:05: process newly discovered inodes - 17 of 17 allocation groups <span style=color:#00f>done</span>
+</span></span><span style=display:flex><span>Phase 4 - check <span style=color:#00f>for</span> duplicate blocks...
+</span></span><span style=display:flex><span>- setting up duplicate extent list...
+</span></span><span style=display:flex><span>- 02:26:05: setting up duplicate extent list - 17 of 17 allocation groups <span style=color:#00f>done</span>
+</span></span><span style=display:flex><span>- check <span style=color:#00f>for</span> inodes claiming duplicate blocks...
+</span></span><span style=display:flex><span>- agno = 0
+</span></span><span style=display:flex><span>- agno = 6
+</span></span><span style=display:flex><span>- agno = 7
+</span></span><span style=display:flex><span>- agno = 8
+</span></span><span style=display:flex><span>- agno = 9
+</span></span><span style=display:flex><span>- agno = 10
+</span></span><span style=display:flex><span>- agno = 11
+</span></span><span style=display:flex><span>- agno = 12
+</span></span><span style=display:flex><span>- agno = 13
+</span></span><span style=display:flex><span>- agno = 14
+</span></span><span style=display:flex><span>- agno = 15
+</span></span><span style=display:flex><span>- agno = 16
+</span></span><span style=display:flex><span>- agno = 1
+</span></span><span style=display:flex><span>- agno = 3
+</span></span><span style=display:flex><span>- agno = 4
+</span></span><span style=display:flex><span>- agno = 5
+</span></span><span style=display:flex><span>- agno = 2
+</span></span><span style=display:flex><span>- 02:26:05: check <span style=color:#00f>for</span> inodes claiming duplicate blocks - 384 of 384 inodes <span style=color:#00f>done</span>
+</span></span><span style=display:flex><span>Phase 5 - rebuild AG headers and trees...
+</span></span><span style=display:flex><span>- 02:26:05: rebuild AG headers and trees - 17 of 17 allocation groups <span style=color:#00f>done</span>
+</span></span><span style=display:flex><span>- reset superblock...
+</span></span><span style=display:flex><span>Phase 6 - check inode connectivity...
+</span></span><span style=display:flex><span>- resetting contents of realtime bitmap and summary inodes
+</span></span><span style=display:flex><span>- traversing filesystem ...
+</span></span><span style=display:flex><span>- traversal finished ...
+</span></span><span style=display:flex><span>- moving disconnected inodes to lost+found ...
+</span></span><span style=display:flex><span>Phase 7 - verify and correct link counts...
+</span></span><span style=display:flex><span>- 02:26:05: verify and correct link counts - 17 of 17 allocation groups <span style=color:#00f>done</span>
+</span></span><span style=display:flex><span>Metadata corruption detected at xfs_bmbt block 0x2d9ff8/0x1000
+</span></span><span style=display:flex><span>libxfs_writebufr: write verifer failed on xfs_bmbt bno 0x2d9ff8/0x1000
+</span></span><span style=display:flex><span>Maximum metadata LSN (82836:5824) is ahead of log (1:64).
+</span></span><span style=display:flex><span>Format log to cycle 82839.
+</span></span><span style=display:flex><span>releasing dirty buffer (bulk) to free list!done
+</span></span><span style=display:flex><span>[root@twtpedev013 /]<span style=color:green># mount /dev/rbd0 test-mysql/</span>
+</span></span><span style=display:flex><span>[root@twtpedev013 /]<span style=color:green># ls test-mysql/</span>
+</span></span><span style=display:flex><span><span style=color:green>#ib_16384_0.dblwr binlog.000009 client-cert.pem ib_logfile1 performance_schema sys</span>
+</span></span><span style=display:flex><span><span style=color:green>#ib_16384_1.dblwr binlog.index client-key.pem ibdata1 private_key.pem undo_001</span>
+</span></span><span style=display:flex><span><span style=color:green>#innodb_temp binlog.~rec~ eams ibtmp1 public_key.pem undo_002</span>
+</span></span><span style=display:flex><span>auto.cnf ca-key.pem ib_buffer_pool mysql server-cert.pem
+</span></span><span style=display:flex><span>binlog.000008 ca.pem ib_logfile0 mysql.ibd server-key.pem
+</span></span><span style=display:flex><span>[root@twtpedev013 /]<span style=color:green># umount /dev/rbd0</span>
+</span></span><span style=display:flex><span>[root@twtpedev013 /]<span style=color:green># rbd unmap /dev/rbd0</span></span></span></code></pre></div><p>之後再重新將該MySQL deployment重啟發現正常了</p><pre tabindex=0><code>2023-05-04 10:28:38+08:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 8.0.21-1debian10 started.
+2023-05-04 10:28:41+08:00 [Note] [Entrypoint]: Switching to dedicated user &#39;mysql&#39;
+2023-05-04 10:28:41+08:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 8.0.21-1debian10 started.
+2023-05-04T02:28:42.380318Z 0 [System] [MY-010116] [Server] /usr/sbin/mysqld (mysqld 8.0.21) starting as process 1
+2023-05-04T02:28:42.428012Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+2023-05-04T02:28:47.779944Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+2023-05-04T02:28:48.922746Z 0 [System] [MY-011323] [Server] X Plugin ready for connections. Bind-address: &#39;::&#39; port: 33060, socket: /var/run/mysqld/mysqlx.sock
+2023-05-04T02:28:49.052930Z 0 [System] [MY-010229] [Server] Starting XA crash recovery...
+2023-05-04T02:28:49.070234Z 0 [System] [MY-010232] [Server] XA crash recovery finished.
+2023-05-04T02:28:49.287142Z 0 [Warning] [MY-010068] [Server] CA certificate ca.pem is self signed.
+2023-05-04T02:28:49.287524Z 0 [System] [MY-013602] [Server] Channel mysql_main configured to support TLS. Encrypted connections are now supported for this channel.
+2023-05-04T02:28:49.330334Z 0 [Warning] [MY-011810] [Server] Insecure configuration for --pid-file: Location &#39;/var/run/mysqld&#39; in the path is accessible to all OS users. Consider choosing a different directory.
+2023-05-04T02:28:50.168132Z 0 [System] [MY-010931] [Server] /usr/sbin/mysqld: ready for connections. Version: &#39;8.0.21&#39;  socket: &#39;/var/run/mysqld/mysqld.sock&#39;  port: 3306  MySQL Community Server - GPL.</code></pre><h2 id=ref>ref</h2><p><a href=https://docs.ceph.com/en/quincy/start/quick-rbd/ rel=external>https://docs.ceph.com/en/quincy/start/quick-rbd/</a>
+<a href=https://blog.51cto.com/u_13210651/2352686 rel=external>https://blog.51cto.com/u_13210651/2352686</a>
+<a href=https://www.tecmint.com/find-linux-filesystem-type/ rel=external>https://www.tecmint.com/find-linux-filesystem-type/</a></p>]]></description><guid isPermaLink="false">tag:chienfuchen32.github.io,2023-05-06:/posts/how-to-repair-file-system-provided-from-kubernetes-ceph-persistent-volume/</guid><link>https://chienfuchen32.github.io/posts/how-to-repair-file-system-provided-from-kubernetes-ceph-persistent-volume/</link><atom:link href="https://chienfuchen32.github.io/posts/how-to-repair-file-system-provided-from-kubernetes-ceph-persistent-volume/" hreflang="en-us" rel="alternate" type="text/html"/><pubDate>Sat, 06 May 2023 09:29:38 +0800</pubDate><title>How to Repair File System Provided From Kubernetes Ceph Persistent Volume</title></item><item><description><![CDATA[<p><img src=https://d33wubrfki0l68.cloudfront.net/d1411cded83856552f37911eb4522d9887ca4e83/b94b2/images/kubeadm/kubeadm-ha-topology-stacked-etcd.svg alt=kubeadm-ha-topology></p><h4 id=load-balancer--vip>Load balancer & VIP</h4><p><a href=https://www.digitalocean.com/community/tutorials/how-to-set-up-highly-available-haproxy-servers-with-keepalived-and-reserved-ips-on-ubuntu-14-04 rel=external>HAProxy & Keepalived</a></p><h4 id=init-ha-control-plane--worker-node>Init HA control plane & worker node</h4><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>sudo kubeadm init --control-plane-endpoint <span style=color:#a31515>&#34;LOAD_BALANCER_DNS:LOAD_BALANCER_PORT&#34;</span> --upload-certs
+</span></span><span style=display:flex><span>...
+</span></span><span style=display:flex><span>...
+</span></span><span style=display:flex><span>You can now join any number of control-plane node by running the following command on each as a root:
+</span></span><span style=display:flex><span>    kubeadm join 192.168.0.200:6443 --token 9vr73a.a8uxyaju799qwdjv --discovery-token-ca-cert-hash sha256:7c2e69131a36ae2a042a339b33381c6d0d43887e2de83720eff5359e26aec866 --control-plane --certificate-key f8902e114ef118304e561c3ecd4d0b543adc226b7a07f675f56564185ffe0c07
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Please note that the certificate-key gives access to cluster sensitive data, keep it secret!
+</span></span><span style=display:flex><span>As a safeguard, uploaded-certs will be deleted in two hours; If necessary, you can use kubeadm init phase upload-certs to reload certs afterward.
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>Then you can join any number of worker nodes by running the following on each as root:
+</span></span><span style=display:flex><span>    kubeadm join 192.168.0.200:6443 --token 9vr73a.a8uxyaju799qwdjv --discovery-token-ca-cert-hash sha256:7c2e69131a36ae2a042a339b33381c6d0d43887e2de83720eff5359e26aec866</span></span></code></pre></div><h4 id=networking-with-weave-net>Networking with Weave Net</h4><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>$ kubectl apply -f <span style=color:#a31515>&#34;https://cloud.weave.works/k8s/net?k8s-version=</span><span style=color:#00f>$(</span>kubectl version | base64 | tr -d <span style=color:#a31515>&#39;\n&#39;</span><span style=color:#00f>)</span><span style=color:#a31515>&#34;</span></span></span></code></pre></div><ul><li><a href=https://www.weave.works/docs/net/latest/overview/ rel=external>https://www.weave.works/docs/net/latest/overview/</a></li><li><a href=https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/ rel=external>https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/</a></li></ul><h4 id=ingress-controller-with-nginx>Ingress controller with Nginx</h4><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>$ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.3.1/deploy/static/provider/cloud/deploy.yaml</span></span></code></pre></div><ul><li><a href=https://kubernetes.github.io/ingress-nginx/ rel=external>https://kubernetes.github.io/ingress-nginx/</a></li></ul><h4 id=storage>Storage</h4><ul><li>Ceph
+<img src=https://rook.io/docs/rook/v1.10/Getting-Started/ceph-storage/kubernetes.png alt="Rook Ceph"></li></ul><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>$ git clone --single-branch --branch v1.10.1 https://github.com/rook/rook.git
+</span></span><span style=display:flex><span>$ cd rook/deploy/examples
+</span></span><span style=display:flex><span>$ kubectl create -f crds.yaml -f common.yaml -f operator.yaml
+</span></span><span style=display:flex><span>$ kubectl create -f cluster.yaml</span></span></code></pre></div><ul><li><a href=https://rook.io/docs/rook/v1.10/Getting-Started/intro/ rel=external>https://rook.io/docs/rook/v1.10/Getting-Started/intro/</a></li></ul><h4 id=monitoring>Monitoring</h4><ul><li>Prometheus, Grafana
+<img src=https://prometheus.io/assets/architecture.png alt=Prometheus></li></ul><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>$ helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+</span></span><span style=display:flex><span>$ helm repo update
+</span></span><span style=display:flex><span>$ helm install -n [NAMESPACE] [RELEASE_NAME] prometheus-community/kube-prometheus-stack</span></span></code></pre></div><ul><li><a href=https://prometheus.io rel=external>https://prometheus.io</a></li><li><a href=https://grafana.com/oss/grafana/ rel=external>https://grafana.com/oss/grafana/</a></li></ul><h4 id=log>Log</h4><ul><li>Loki
+<img src=https://grafana.com/static/img/logs/logs-loki-diagram.svg alt=Loki></li></ul><div class=highlight><pre tabindex=0 style=background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>$ helm repo add grafana https://grafana.github.io/helm-charts
+</span></span><span style=display:flex><span>$ helm repo update
+</span></span><span style=display:flex><span>$ helm upgrade --install --namespace=[NAMESPACE] [RELEASE_NAME] grafana/loki-stack</span></span></code></pre></div><ul><li><a href=https://grafana.com/oss/loki/ rel=external>https://grafana.com/oss/loki/</a></li></ul>]]></description><guid isPermaLink="false">tag:chienfuchen32.github.io,2020-09-18:/posts/on-prem-k8s-installation/</guid><link>https://chienfuchen32.github.io/posts/on-prem-k8s-installation/</link><atom:link href="https://chienfuchen32.github.io/posts/on-prem-k8s-installation/" hreflang="en-us" rel="alternate" type="text/html"/><pubDate>Fri, 18 Sep 2020 10:00:04 +0800</pubDate><title>On-Premises K8s Installation</title></item></channel></rss>
